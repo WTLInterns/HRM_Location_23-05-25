@@ -1,0 +1,123 @@
+package com.jaywant.demo.Controller;
+
+import com.jaywant.demo.Entity.MasterAdmin;
+import com.jaywant.demo.Service.MasterAdminPasswordReset;
+import com.jaywant.demo.Service.MasterAdminService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping("/masteradmin")
+public class MasterAdminController {
+
+  @Autowired
+  private MasterAdminService masterAdminService;
+
+  @Autowired
+  private MasterAdminPasswordReset passwordResetService;
+
+  @PostMapping("/register")
+  public ResponseEntity<?> registerMasterAdmin(
+      @RequestParam("name") String name,
+      @RequestParam("email") String email,
+      @RequestParam("mobileno") long mobileno,
+      @RequestParam("roll") String roll,
+      @RequestParam("password") String password,
+      @RequestParam(value = "profileImg", required = false) MultipartFile profileImg) {
+    try {
+      MasterAdmin masterAdmin = new MasterAdmin(name, email, mobileno, roll, password);
+      MasterAdmin saved = masterAdminService.registerMasterAdmin(masterAdmin, profileImg);
+      return ResponseEntity.ok(saved);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Registration failed: " + e.getMessage());
+    }
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
+    MasterAdmin admin = masterAdminService.login(email, password);
+    return admin != null ? ResponseEntity.ok(admin)
+        : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+  }
+
+  @PutMapping(value = "/update", consumes = "multipart/form-data")
+public ResponseEntity<?> updateMasterAdmin(
+    @RequestParam("id") Long id,
+    @RequestParam("name") String name,
+    @RequestParam("email") String email,
+    @RequestParam("mobileno") long mobileno,
+    @RequestParam("roll") String roll,
+    @RequestParam("password") String password,
+    @RequestParam(value = "profileImg", required = false) MultipartFile profileImg) {
+  try {
+    MasterAdmin masterAdmin = new MasterAdmin(id, name, email, mobileno, roll, password);
+    MasterAdmin updated = masterAdminService.updateMasterAdmin(masterAdmin, profileImg);
+    return ResponseEntity.ok(updated);
+  } catch (Exception e) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Update failed: " + e.getMessage());
+  }
+}
+
+
+  @GetMapping("/find")
+  public ResponseEntity<?> findByEmail(@RequestParam String email) {
+    MasterAdmin admin = masterAdminService.findByEmail(email);
+    return admin != null ? ResponseEntity.ok(admin)
+        : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Master Admin not found");
+  }
+
+  @DeleteMapping("/delete/{id}")
+  public ResponseEntity<?> deleteMasterAdmin(@PathVariable Long id) {
+    try {
+      masterAdminService.deleteMasterAdmin(id);
+      return ResponseEntity.ok("Master Admin deleted successfully");
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Delete failed: " + e.getMessage());
+    }
+  }
+
+  @PostMapping("/update-password")
+  public ResponseEntity<?> updatePassword(@RequestParam Long id, @RequestParam String newPassword) {
+    try {
+      masterAdminService.updatePassword(id, newPassword);
+      return ResponseEntity.ok("Password updated successfully");
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password update failed: " + e.getMessage());
+    }
+  }
+
+  @PostMapping("/forgot-password/request")
+  public ResponseEntity<?> requestForgotPassword(@RequestParam String email) {
+    try {
+      passwordResetService.sendResetOTP(email);
+      return ResponseEntity.ok("OTP sent to email: " + email);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP request failed: " + e.getMessage());
+    }
+  }
+
+  @PostMapping("/forgot-password/verify")
+  public ResponseEntity<?> verifyOtpAndResetPassword(
+      @RequestParam String email,
+      @RequestParam String otp,
+      @RequestParam String newPassword) {
+    if (!passwordResetService.verifyOTP(email, otp)) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid OTP");
+    }
+    try {
+      passwordResetService.resetPassword(email, newPassword);
+      return ResponseEntity.ok("Password reset successful");
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password reset failed: " + e.getMessage());
+    }
+  }
+
+  @PostMapping("/reg")
+  public String testRegister() {
+    return "Register endpoint is working!";
+  }
+}

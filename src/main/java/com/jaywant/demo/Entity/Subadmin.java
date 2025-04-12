@@ -14,12 +14,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
-
 @Entity
 public class Subadmin {
-    
 
-       @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
@@ -33,6 +31,7 @@ public class Subadmin {
     private String registercompanyname;
     private String companylogo;
     private String role = "SUB_ADMIN";
+    private String gstno;
 
     @ManyToOne
     @JoinColumn(name = "master_admin_id")
@@ -42,4 +41,117 @@ public class Subadmin {
     @OneToMany(mappedBy = "subadmin", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Employee> employee;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public String getStampImg() {
+        return stampImg;
+    }
+
+    public void setStampImg(String stampImg) {
+        this.stampImg = stampImg;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneno() {
+        return phoneno;
+    }
+
+    public void setPhoneno(String phoneno) {
+        this.phoneno = phoneno;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRegistercompanyname() {
+        return registercompanyname;
+    }
+
+    public void setRegistercompanyname(String registercompanyname) {
+        this.registercompanyname = registercompanyname;
+    }
+
+    public String getCompanylogo() {
+        return companylogo;
+    }
+
+    public void setCompanylogo(String companylogo) {
+        this.companylogo = companylogo;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getGstno() {
+        return gstno;
+    }
+
+    public void setGstno(String gstno) {
+        this.gstno = gstno;
+    }
+
+    public MasterAdmin getMasterAdmin() {
+        return masterAdmin;
+    }
+
+    public void setMasterAdmin(MasterAdmin masterAdmin) {
+        this.masterAdmin = masterAdmin;
+    }
+
+    public List<Employee> getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(List<Employee> employee) {
+        this.employee = employee;
+    }
+
 }
