@@ -32,6 +32,7 @@ public class Subadmin {
     private String companylogo;
     private String role = "SUB_ADMIN";
     private String gstno;
+    private String status;
 
     @ManyToOne
     @JoinColumn(name = "master_admin_id")
@@ -152,6 +153,14 @@ public class Subadmin {
 
     public void setEmployee(List<Employee> employee) {
         this.employee = employee;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }

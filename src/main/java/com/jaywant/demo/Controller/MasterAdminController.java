@@ -1,6 +1,7 @@
 package com.jaywant.demo.Controller;
 
 import com.jaywant.demo.Entity.MasterAdmin;
+import com.jaywant.demo.Entity.Subadmin;
 import com.jaywant.demo.Service.MasterAdminPasswordReset;
 import com.jaywant.demo.Service.MasterAdminService;
 
@@ -19,6 +20,8 @@ public class MasterAdminController {
 
   @Autowired
   private MasterAdminPasswordReset passwordResetService;
+
+  // ----- MasterAdmin Endpoints -----
 
   @PostMapping("/register")
   public ResponseEntity<?> registerMasterAdmin(
@@ -45,23 +48,22 @@ public class MasterAdminController {
   }
 
   @PutMapping(value = "/update", consumes = "multipart/form-data")
-public ResponseEntity<?> updateMasterAdmin(
-    @RequestParam("id") Long id,
-    @RequestParam("name") String name,
-    @RequestParam("email") String email,
-    @RequestParam("mobileno") long mobileno,
-    @RequestParam("roll") String roll,
-    @RequestParam("password") String password,
-    @RequestParam(value = "profileImg", required = false) MultipartFile profileImg) {
-  try {
-    MasterAdmin masterAdmin = new MasterAdmin(id, name, email, mobileno, roll, password);
-    MasterAdmin updated = masterAdminService.updateMasterAdmin(masterAdmin, profileImg);
-    return ResponseEntity.ok(updated);
-  } catch (Exception e) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Update failed: " + e.getMessage());
+  public ResponseEntity<?> updateMasterAdmin(
+      @RequestParam("id") Long id,
+      @RequestParam("name") String name,
+      @RequestParam("email") String email,
+      @RequestParam("mobileno") long mobileno,
+      @RequestParam("roll") String roll,
+      @RequestParam("password") String password,
+      @RequestParam(value = "profileImg", required = false) MultipartFile profileImg) {
+    try {
+      MasterAdmin masterAdmin = new MasterAdmin(id, name, email, mobileno, roll, password);
+      MasterAdmin updated = masterAdminService.updateMasterAdmin(masterAdmin, profileImg);
+      return ResponseEntity.ok(updated);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Update failed: " + e.getMessage());
+    }
   }
-}
-
 
   @GetMapping("/find")
   public ResponseEntity<?> findByEmail(@RequestParam String email) {
@@ -119,5 +121,39 @@ public ResponseEntity<?> updateMasterAdmin(
   @PostMapping("/reg")
   public String testRegister() {
     return "Register endpoint is working!";
+  }
+
+  // ----- Subadmin Endpoint -----
+  // The endpoint now accepts multipart/form-data for file uploads
+
+  @PostMapping(value = "/addSubAdmin/{id}", consumes = "multipart/form-data")
+  public ResponseEntity<?> addSubAdmin(
+      @PathVariable Long id,
+      @RequestParam("name") String name,
+      @RequestParam("lastname") String lastname,
+      @RequestParam("email") String email,
+      @RequestParam("phoneno") String phoneno,
+      @RequestParam("password") String password,
+      @RequestParam("registercompanyname") String registercompanyname,
+      @RequestParam("gstno") String gstno,
+      @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
+      @RequestParam(value = "signature", required = false) MultipartFile signature,
+      @RequestParam(value = "companylogo", required = false) MultipartFile companylogo) {
+    try {
+      Subadmin subadmin = new Subadmin();
+      subadmin.setName(name);
+      subadmin.setLastname(lastname);
+      subadmin.setEmail(email);
+      subadmin.setPhoneno(phoneno);
+      subadmin.setPassword(password);
+      subadmin.setRegistercompanyname(registercompanyname);
+      subadmin.setGstno(gstno);
+      // Role will be set by default in the entity ("SUB_ADMIN")
+
+      Subadmin saved = masterAdminService.createSubAdmin(subadmin, id, stampImg, signature, companylogo);
+      return ResponseEntity.ok(saved);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("SubAdmin registration failed: " + e.getMessage());
+    }
   }
 }
