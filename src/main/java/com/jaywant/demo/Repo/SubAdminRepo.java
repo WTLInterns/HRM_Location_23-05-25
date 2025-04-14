@@ -10,4 +10,5 @@ public interface SubAdminRepo extends JpaRepository<Subadmin, Integer> {
   List<Subadmin> findByRegistercompanyname(String registercompanyname);
 
   List<Subadmin> findByStatus(String status);
+
 }

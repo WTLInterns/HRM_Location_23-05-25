@@ -124,3 +124,110 @@ public class MasterAdminService {
     return subAdminRepo.save(subAdmin);
   }
 }
+
+// package com.jaywant.demo.Service;
+
+// import com.jaywant.demo.Entity.MasterAdmin;
+// import com.jaywant.demo.Repo.MasterAdminRepo;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.stereotype.Service;
+// import org.springframework.web.multipart.MultipartFile;
+
+// import java.io.IOException;
+// import java.nio.file.*;
+
+// @Service
+// public class MasterAdminService {
+
+// @Autowired
+// private MasterAdminRepo masterRepo;
+
+// // Directory for file uploads (ensure this folder exists or will be created)
+// private final String uploadDir = "src/main/resources/static/images/profile/";
+
+// // Register new MasterAdmin with an optional profile image file
+// public MasterAdmin registerMasterAdmin(MasterAdmin masterAdmin, MultipartFile
+// profileImgFile) {
+// if (profileImgFile != null && !profileImgFile.isEmpty()) {
+// String savedFileName = saveFile(profileImgFile);
+// masterAdmin.setProfileImg(savedFileName);
+// }
+// return masterRepo.save(masterAdmin);
+// }
+
+// // Login method (plain password comparison; not secure for production)
+// public MasterAdmin login(String email, String password) {
+// MasterAdmin admin = masterRepo.findByEmail(email);
+// return (admin != null && admin.getPassword().equals(password)) ? admin :
+// null;
+// }
+
+// // Update MasterAdmin with an optional profile image file
+// public MasterAdmin updateMasterAdmin(MasterAdmin updatedAdmin, MultipartFile
+// profileImgFile) {
+// MasterAdmin existing = masterRepo.findById(updatedAdmin.getId())
+// .orElseThrow(() -> new RuntimeException("Master Admin not found"));
+// existing.setName(updatedAdmin.getName());
+// existing.setEmail(updatedAdmin.getEmail());
+// existing.setMobileno(updatedAdmin.getMobileno());
+// existing.setRoll(updatedAdmin.getRoll());
+
+// if (!updatedAdmin.getPassword().equals(existing.getPassword())) {
+// existing.setPassword(updatedAdmin.getPassword());
+// }
+
+// if (profileImgFile != null && !profileImgFile.isEmpty()) {
+// String savedFileName = saveFile(profileImgFile);
+// existing.setProfileImg(savedFileName);
+// }
+
+// return masterRepo.save(existing);
+// }
+
+// // Overloaded update without profile image
+// public MasterAdmin updateMasterAdmin(MasterAdmin updatedAdmin) {
+// return updateMasterAdmin(updatedAdmin, null);
+// }
+
+// // Delete MasterAdmin by ID
+// public void deleteMasterAdmin(Long id) {
+// if (!masterRepo.existsById(id)) {
+// throw new RuntimeException("Master Admin with ID " + id + " not found");
+// }
+// masterRepo.deleteById(id);
+// }
+
+// // Update password
+// public void updatePassword(Long id, String newPassword) {
+// MasterAdmin admin = masterRepo.findById(id)
+// .orElseThrow(() -> new RuntimeException("Master Admin not found"));
+// admin.setPassword(newPassword);
+// masterRepo.save(admin);
+// }
+
+// // Find MasterAdmin by email
+// public MasterAdmin findByEmail(String email) {
+// return masterRepo.findByEmail(email);
+// }
+
+// // Save uploaded file to local storage
+// private String saveFile(MultipartFile file) {
+// String originalFilename = file.getOriginalFilename();
+// String newFilename = System.currentTimeMillis() + "_" +
+// (originalFilename != null ? originalFilename : "profile");
+
+// try {
+// Path dirPath = Paths.get(uploadDir);
+// if (!Files.exists(dirPath)) {
+// Files.createDirectories(dirPath);
+// }
+
+// Path filePath = dirPath.resolve(newFilename);
+// Files.copy(file.getInputStream(), filePath,
+// StandardCopyOption.REPLACE_EXISTING);
+// } catch (IOException e) {
+// throw new RuntimeException("Failed to save file: " + newFilename, e);
+// }
+// return newFilename;
+// }
+// }
