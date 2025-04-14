@@ -1,29 +1,21 @@
 package com.jaywant.demo.Repo;
 
-import java.util.List;
+import com.jaywant.demo.Entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import com.jaywant.demo.Entity.Employee;
+
+import java.util.Optional;
 
 @Repository
 public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
 
-    Employee findByEmail(String email);
+    /**
+     * Finds an employee by the subadmin’s id and the full name (firstName + ' ' + lastName).
+     * Adjust the concatenation as needed if you store or require a middle name.
+     */
+    @Query("SELECT e FROM Employee e WHERE e.subadmin.id = :subadminId AND CONCAT(e.firstName, ' ', e.lastName) = :fullName")
+    Employee findBySubadminIdAndFullName(int subadminId, String fullName);
 
-    Employee findById(int empId);
-
-    Employee findByFirstName(String firstName);
-
-    @Query("SELECT e FROM Employee e WHERE lower(e.firstName) = lower(:firstName) AND lower(e.lastName) = lower(:lastName)")
-    Employee findByFirstNameAndLastName(@Param("firstName") String firstName,
-            @Param("lastName") String lastName);
-
-    @Query("SELECT e FROM Employee e WHERE CONCAT(lower(e.firstName), ' ', lower(e.lastName)) = lower(:fullName)")
-    Employee findByFullName(@Param("fullName") String fullName);
-
-    // Optionally remove or update this method if the Employee entity doesn't have a
-    // property named "company"
-    // List<Employee> findByCompany(String company);
+    Optional<Employee> findByEmail(String email);
 }
