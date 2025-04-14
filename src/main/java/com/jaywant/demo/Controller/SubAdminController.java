@@ -505,4 +505,35 @@ public class SubAdminController {
     }
   }
 
+  // Endpoint to get all subadmins with details
+  @GetMapping("/all")
+  public ResponseEntity<?> getAllSubadmins() {
+    try {
+      List<Subadmin> subadmins = subAdminRepo.findAll();
+      if (subadmins.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No subadmins found.");
+      }
+      return ResponseEntity.ok(subadmins);
+    } catch (Exception ex) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("An error occurred while fetching subadmins.");
+    }
+  }
+
+  @DeleteMapping("/delete/{id}")
+  public ResponseEntity<?> deleteSubAdmin(@PathVariable int id) {
+    // Check if the subadmin exists
+    Optional<Subadmin> subAdminOpt = subAdminRepo.findById(id);
+
+    if (!subAdminOpt.isPresent()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body("SubAdmin with ID " + id + " not found.");
+    }
+
+    // Delete the subadmin record
+    subAdminRepo.deleteById(id);
+
+    return ResponseEntity.ok("SubAdmin deleted successfully.");
+  }
+
 }

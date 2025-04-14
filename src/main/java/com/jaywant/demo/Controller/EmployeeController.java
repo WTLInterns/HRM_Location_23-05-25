@@ -1,9 +1,11 @@
 package com.jaywant.demo.Controller;
 
+import com.jaywant.demo.DTO.SalaryDTO;
 import com.jaywant.demo.Entity.Attendance;
 import com.jaywant.demo.Entity.Employee;
 import com.jaywant.demo.Repo.AttendanceRepo;
 import com.jaywant.demo.Repo.EmployeeRepo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
+import com.jaywant.demo.Service.EmployeeService;
+import com.jaywant.demo.Service.SalaryService;
 
 @RestController
 @RequestMapping("/api/employee")
@@ -22,6 +27,12 @@ public class EmployeeController {
 
   @Autowired
   private AttendanceRepo attendanceRepository;
+
+  @Autowired
+  private EmployeeService empService;
+
+  @Autowired
+  private SalaryService salaryService;
 
   // =====================================================
   // Attendance Endpoints
@@ -177,4 +188,29 @@ public class EmployeeController {
     String fullName = employee.getFirstName() + " " + employee.getLastName();
     return ResponseEntity.ok(fullName);
   }
+
+  /**
+   * GET: Generate salary report for an employee based on attendance dates
+   * URL: GET
+   * /api/subadmin/employee/{companyName}/{employeeFullName}/attendance/report?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd
+   */
+  @GetMapping("/employee/{companyName}/{employeeFullName}/attendance/report")
+  public ResponseEntity<SalaryDTO> generateSalaryReport(
+      @PathVariable String companyName,
+      @PathVariable String employeeFullName,
+      @RequestParam String startDate,
+      @RequestParam String endDate) {
+
+    Employee employee = empService.findByEmployeeName(employeeFullName);
+    // Here, we assume the employee's company comes from its associated Subadmin's
+    // registercompanyname.
+    if (employee == null || employee.getSubadmin() == null ||
+        !employee.getSubadmin().getRegistercompanyname().equalsIgnoreCase(companyName)) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    SalaryDTO report = salaryService.generateSalaryReport(employeeFullName, startDate, endDate);
+    return ResponseEntity.ok(report);
+  }
+
 }

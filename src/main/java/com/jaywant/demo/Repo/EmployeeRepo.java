@@ -11,11 +11,17 @@ import java.util.Optional;
 public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
 
     /**
-     * Finds an employee by the subadmin’s id and the full name (firstName + ' ' + lastName).
-     * Adjust the concatenation as needed if you store or require a middle name.
+     * Finds an employee by subadmin’s id and full name.
+     * (Note: This method requires a subadmin id to be provided.)
      */
     @Query("SELECT e FROM Employee e WHERE e.subadmin.id = :subadminId AND CONCAT(e.firstName, ' ', e.lastName) = :fullName")
     Employee findBySubadminIdAndFullName(int subadminId, String fullName);
+
+    /**
+     * Finds an employee by concatenated first name and last name.
+     */
+    @Query("SELECT e FROM Employee e WHERE CONCAT(e.firstName, ' ', e.lastName) = :fullName")
+    Employee findByFullName(String fullName);
 
     Optional<Employee> findByEmail(String email);
 }
