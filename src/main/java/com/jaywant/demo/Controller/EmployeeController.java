@@ -213,4 +213,20 @@ public class EmployeeController {
     return ResponseEntity.ok(report);
   }
 
+
+  /**
+     * GET: Retrieve all employees under a given subadmin.
+     * URL: GET /api/employee/{subadminId}/employee/all
+     */
+    @GetMapping("/{subadminId}/employee/all")
+    public ResponseEntity<?> getAllEmployeesForSubadmin(@PathVariable int subadminId) {
+        List<Employee> employees = employeeRepository.findBySubadminId(subadminId);
+        if (employees == null || employees.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No employees found for SubAdmin ID: " + subadminId);
+        }
+        return ResponseEntity.ok(employees);
+    }
+
+
 }

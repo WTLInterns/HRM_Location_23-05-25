@@ -1,11 +1,13 @@
 package com.jaywant.demo.Repo;
 
-import com.jaywant.demo.Entity.Employee;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.jaywant.demo.Entity.Employee;
 
 @Repository
 public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
@@ -24,4 +26,7 @@ public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
     Employee findByFullName(String fullName);
 
     Optional<Employee> findByEmail(String email);
+
+    List<Employee> findBySubadminId(int subadminId);
+
 }
