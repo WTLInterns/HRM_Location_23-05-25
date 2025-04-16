@@ -1,19 +1,28 @@
 package com.jaywant.demo.Controller;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.jaywant.demo.DTO.SalaryDTO;
 import com.jaywant.demo.Entity.Attendance;
 import com.jaywant.demo.Entity.Employee;
 import com.jaywant.demo.Repo.AttendanceRepo;
 import com.jaywant.demo.Repo.EmployeeRepo;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
-
+import com.jaywant.demo.Service.AttendanceService;
 import com.jaywant.demo.Service.EmployeeService;
 import com.jaywant.demo.Service.SalaryService;
 
@@ -27,6 +36,9 @@ public class EmployeeController {
 
   @Autowired
   private AttendanceRepo attendanceRepository;
+
+  @Autowired
+  private AttendanceService attendanceService;
 
   @Autowired
   private EmployeeService empService;
@@ -107,6 +119,15 @@ public class EmployeeController {
   /**
    * Update employee details.
    */
+
+  // @PostMapping("/{subAdminId}/{fullName}/attendance/add")
+  // public List<Attendance> addAttendances(@PathVariable int subAdminId,
+  // @PathVariable String fullName,
+  // @RequestBody List<Attendance> attendances) {
+  // return this.attendanceService.addAttendance(subAdminId, fullName,
+  // attendances);
+  // }
+
   @PutMapping("/{subadminId}/update/{empId}")
   public ResponseEntity<?> updateEmployee(@PathVariable int subadminId,
       @PathVariable int empId,
@@ -202,31 +223,53 @@ public class EmployeeController {
       @RequestParam String endDate) {
 
     Employee employee = empService.findByEmployeeName(employeeFullName);
-    // Here, we assume the employee's company comes from its associated Subadmin's
-    // registercompanyname.
+    // Check if the employee exists and its associated subadmin's company name
+    // matches.
     if (employee == null || employee.getSubadmin() == null ||
         !employee.getSubadmin().getRegistercompanyname().equalsIgnoreCase(companyName)) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
-    SalaryDTO report = salaryService.generateSalaryReport(employeeFullName, startDate, endDate);
+    SalaryDTO report = salaryService.generateSalaryReport(employee, startDate, endDate);
     return ResponseEntity.ok(report);
   }
 
-
   /**
-     * GET: Retrieve all employees under a given subadmin.
-     * URL: GET /api/employee/{subadminId}/employee/all
-     */
-    @GetMapping("/{subadminId}/employee/all")
-    public ResponseEntity<?> getAllEmployeesForSubadmin(@PathVariable int subadminId) {
-        List<Employee> employees = employeeRepository.findBySubadminId(subadminId);
-        if (employees == null || employees.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No employees found for SubAdmin ID: " + subadminId);
-        }
-        return ResponseEntity.ok(employees);
+   * GET: Retrieve all employees under a given subadmin.
+   * URL: GET /api/employee/{subadminId}/employee/all
+   */
+  @GetMapping("/{subadminId}/employee/all")
+  public ResponseEntity<?> getAllEmployeesForSubadmin(@PathVariable int subadminId) {
+    List<Employee> employees = employeeRepository.findBySubadminId(subadminId);
+    if (employees == null || employees.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body("No employees found for SubAdmin ID: " + subadminId);
     }
+    return ResponseEntity.ok(employees);
+  }
 
+  @PostMapping("/{subAdminId}/{fullName}/attendance/update/bulk")
+  public ResponseEntity<?> updateBulkAttendance(@PathVariable int subAdminId,
+      @PathVariable String fullName,
+      @RequestBody List<Attendance> attendances) {
+    try {
+      List<Attendance> updated = attendanceService.updateAttendance(subAdminId, fullName, attendances);
+      return ResponseEntity.ok(updated);
+    } catch (RuntimeException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+  }
+
+  @PostMapping("/{subAdminId}/{fullName}/attendance/add/bulk")
+  public ResponseEntity<?> addAttendances(@PathVariable int subAdminId,
+      @PathVariable String fullName,
+      @RequestBody List<Attendance> attendances) {
+    try {
+      List<Attendance> saved = attendanceService.addAttendance(subAdminId, fullName, attendances);
+      return ResponseEntity.ok(saved);
+    } catch (RuntimeException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+  }
 
 }

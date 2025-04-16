@@ -22,7 +22,7 @@ public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
     /**
      * Finds an employee by concatenated first name and last name.
      */
-    @Query("SELECT e FROM Employee e WHERE CONCAT(e.firstName, ' ', e.lastName) = :fullName")
+    @Query("SELECT e FROM Employee e WHERE LOWER(TRIM(CONCAT(e.firstName, ' ', e.lastName))) = LOWER(:fullName)")
     Employee findByFullName(String fullName);
 
     Optional<Employee> findByEmail(String email);

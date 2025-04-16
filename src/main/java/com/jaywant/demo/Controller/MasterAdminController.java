@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/masteradmin")
+@CrossOrigin(origins = "*")
 public class MasterAdminController {
 
   @Autowired
