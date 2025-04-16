@@ -33,6 +33,25 @@ public class Subadmin {
     private String role = "SUB_ADMIN";
     private String gstno;
     private String status;
+    private String cinno;
+    private String companyurl;
+    private String address;
+
+    public String getCinno() {
+        return cinno;
+    }
+
+    public void setCinno(String cinno) {
+        this.cinno = cinno;
+    }
+
+    public String getCompanyurl() {
+        return companyurl;
+    }
+
+    public void setCompanyurl(String companyurl) {
+        this.companyurl = companyurl;
+    }
 
     @ManyToOne
     @JoinColumn(name = "master_admin_id")
@@ -161,6 +180,14 @@ public class Subadmin {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
 }

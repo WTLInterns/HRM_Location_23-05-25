@@ -123,6 +123,22 @@ public class MasterAdminService {
 
     return subAdminRepo.save(subAdmin);
   }
+
+  // Add this to MasterAdminService.java
+  public byte[] getProfileImage(String email) throws IOException {
+    MasterAdmin admin = masterRepo.findByEmail(email);
+    if (admin == null || admin.getProfileImg() == null) {
+      throw new RuntimeException("Profile image not found");
+    }
+
+    Path imagePath = Paths.get(uploadDir + admin.getProfileImg());
+    if (!Files.exists(imagePath)) {
+      throw new RuntimeException("Image file not found: " + admin.getProfileImg());
+    }
+
+    return Files.readAllBytes(imagePath);
+  }
+
 }
 
 // package com.jaywant.demo.Service;

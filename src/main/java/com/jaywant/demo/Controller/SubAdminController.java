@@ -681,7 +681,10 @@ public class SubAdminController {
       @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
       @RequestParam(value = "signature", required = false) MultipartFile signature,
       @RequestParam(value = "companylogo", required = false) MultipartFile companylogo,
-      @RequestParam String status) {
+      @RequestParam String status,
+      @RequestParam String companyurl,
+      @RequestParam String address,
+      @RequestParam String cinno) {
     try {
       Optional<Subadmin> subAdminOpt = subAdminRepo.findById(id);
       if (!subAdminOpt.isPresent()) {
@@ -694,6 +697,9 @@ public class SubAdminController {
       subAdmin.setPhoneno(phoneno);
       subAdmin.setRegistercompanyname(registercompanyname);
       subAdmin.setStatus(status);
+      subAdmin.setAddress(address);
+      subAdmin.setCinno(cinno);
+      subAdmin.setCompanyurl(companyurl);
 
       // Update file fields only if provided
       if (stampImg != null && !stampImg.isEmpty())
@@ -918,7 +924,7 @@ public class SubAdminController {
       Subadmin subAdmin = subAdminRepo.findById(id)
           .orElseThrow(() -> new RuntimeException("Subadmin not found with id: " + id));
       // Use the same folder for reading images that is used for saving files.
-      String uploadDir = "src/main/resources/upload/";
+      String uploadDir = "src/main/resources/static/images/profile/";
       Map<String, String> images = new HashMap<>();
 
       if (subAdmin.getStampImg() != null && !subAdmin.getStampImg().isEmpty()) {

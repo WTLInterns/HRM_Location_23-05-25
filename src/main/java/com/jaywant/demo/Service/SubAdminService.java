@@ -20,7 +20,7 @@ public class SubAdminService {
 
   // Directory where all files (images) will be stored.
   // If this folder does not exist, it will be automatically created.
-  private final String uploadDir = "src/main/resources/upload/";
+  private final String uploadDir = "src/main/resources/static/images/profile/";
 
   // Method to return a Subadmin by email.
   public Subadmin getSubAdminByEmail(String email) {
@@ -36,7 +36,8 @@ public class SubAdminService {
    */
   public Subadmin updateSubAdmin(int id, String name, String lastname, String email, String phoneno,
       String registercompanyname, String status,
-      MultipartFile stampImg, MultipartFile signature, MultipartFile companylogo) {
+      MultipartFile stampImg, MultipartFile signature, MultipartFile companylogo, String cinno, String compnayurl,
+      String address) {
 
     Subadmin subAdmin = repo.findById(id)
         .orElseThrow(() -> new RuntimeException("Subadmin not found with ID: " + id));
@@ -47,6 +48,9 @@ public class SubAdminService {
     subAdmin.setPhoneno(phoneno);
     subAdmin.setRegistercompanyname(registercompanyname);
     subAdmin.setStatus(status);
+    subAdmin.setCinno(cinno);
+    subAdmin.setCompanyurl(compnayurl);
+    subAdmin.setAddress(address);
 
     if (stampImg != null && !stampImg.isEmpty()) {
       String stampImgFileName = saveFile(stampImg);

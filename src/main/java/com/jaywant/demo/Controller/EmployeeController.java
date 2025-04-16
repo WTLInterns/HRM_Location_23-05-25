@@ -246,10 +246,41 @@ public class EmployeeController {
           .body("No employees found for SubAdmin ID: " + subadminId);
     }
     return ResponseEntity.ok(employees);
-  }
+   }
 
-  @PostMapping("/{subAdminId}/{fullName}/attendance/update/bulk")
-  public ResponseEntity<?> updateBulkAttendance(@PathVariable int subAdminId,
+  // @PutMapping("/{subAdminId}/{fullName}/attendance/update/bulk")
+  // public ResponseEntity<?> updateBulkAttendance(@PathVariable int subAdminId,
+  //     @PathVariable String fullName,
+  //     @RequestBody List<Attendance> attendances) {
+  //   try {
+  //     List<Attendance> updated = attendanceService.updateAttendance(subAdminId, fullName, attendances);
+  //     return ResponseEntity.ok(updated);
+  //   } catch (RuntimeException e) {
+  //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  //   }
+  // }
+
+  // @PostMapping("/{subAdminId}/{fullName}/attendance/add/bulk")
+  // public ResponseEntity<?> addAttendances(@PathVariable int subAdminId,
+  //     @PathVariable String fullName,
+  //     @RequestBody List<Attendance> attendances) {
+  //   try {
+  //     List<Attendance> saved = attendanceService.addAttendance(subAdminId, fullName, attendances);
+  //     return ResponseEntity.ok(saved);
+  //   } catch (RuntimeException e) {
+  //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  //   }
+  // }
+
+
+  
+  /**
+   * Bulk update attendance endpoint.
+   * URL: POST /api/employee/{subAdminId}/{fullName}/attendance/update/bulk
+   */
+  @PutMapping("/{subAdminId}/{fullName}/attendance/update/bulk")
+  public ResponseEntity<?> updateBulkAttendance(
+      @PathVariable int subAdminId,
       @PathVariable String fullName,
       @RequestBody List<Attendance> attendances) {
     try {
@@ -260,8 +291,13 @@ public class EmployeeController {
     }
   }
 
+  /**
+   * Bulk add attendance endpoint.
+   * URL: POST /api/employee/{subAdminId}/{fullName}/attendance/add/bulk
+   */
   @PostMapping("/{subAdminId}/{fullName}/attendance/add/bulk")
-  public ResponseEntity<?> addAttendances(@PathVariable int subAdminId,
+  public ResponseEntity<?> addAttendances(
+      @PathVariable int subAdminId,
       @PathVariable String fullName,
       @RequestBody List<Attendance> attendances) {
     try {
@@ -270,6 +306,13 @@ public class EmployeeController {
     } catch (RuntimeException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+  }
+
+  @GetMapping("/bulk/{fullName}/{date}")
+  public List<Attendance> getAttendancesBullk(@PathVariable String fullName, @PathVariable String date) {
+
+    return this.attendanceService.getAttendanceByBul(fullName, date);
+
   }
 
 }

@@ -8,10 +8,9 @@ import com.jaywant.demo.Service.MasterAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/masteradmin")
@@ -142,7 +141,12 @@ public class MasterAdminController {
       @RequestParam("status") String status,
       @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
       @RequestParam(value = "signature", required = false) MultipartFile signature,
-      @RequestParam(value = "companylogo", required = false) MultipartFile companylogo) {
+      @RequestParam(value = "companylogo", required = false) MultipartFile companylogo,
+      @RequestParam(value = "cinno", required = false) String cinno,
+      @RequestParam(value = "address", required = false) String address,
+      @RequestParam(value = "companyurl", required = false) String companyurl
+
+  ) {
     try {
       Subadmin subadmin = new Subadmin();
       subadmin.setName(name);
@@ -153,12 +157,28 @@ public class MasterAdminController {
       subadmin.setRegistercompanyname(registercompanyname);
       subadmin.setGstno(gstno);
       subadmin.setStatus(status);
+      subadmin.setAddress(address);
+      subadmin.setCinno(cinno);
+      subadmin.setCompanyurl(companyurl);
       // Role will be set by default in the entity ("SUB_ADMIN")
 
       Subadmin saved = masterAdminService.createSubAdmin(subadmin, id, stampImg, signature, companylogo);
       return ResponseEntity.ok(saved);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("SubAdmin registration failed: " + e.getMessage());
+    }
+  }
+
+  @GetMapping("/profileImg")
+  public ResponseEntity<byte[]> getProfileImage(@RequestParam String email) {
+    try {
+      byte[] imageBytes = masterAdminService.getProfileImage(email);
+      return ResponseEntity.ok()
+          .contentType(MediaType.IMAGE_JPEG) // Or determine dynamically based on file extension
+          .body(imageBytes);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(null);
     }
   }
 
