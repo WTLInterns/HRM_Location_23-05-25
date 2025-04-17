@@ -631,7 +631,7 @@ import com.jaywant.demo.Repo.EmployeeRepo;
 
 @RestController
 @RequestMapping("/api/subadmin")
-@CrossOrigin(origins = "*")
+// @CrossOrigin(origins = "*")
 public class SubAdminController {
 
   @Autowired
@@ -651,6 +651,7 @@ public class SubAdminController {
 
   // Endpoint for SubAdmin login
   @PostMapping("/login")
+  @CrossOrigin("*")
   public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
     try {
       List<Subadmin> subAdmins = subAdminRepo.findByEmail(email);
@@ -670,6 +671,52 @@ public class SubAdminController {
   }
 
   // Endpoint for updating SubAdmin fields including status and image files.
+  // @PutMapping("/update-fields/{id}")
+  // public ResponseEntity<?> updateSubAdminFields(
+  //     @PathVariable int id,
+  //     @RequestParam String name,
+  //     @RequestParam String lastname,
+  //     @RequestParam String email,
+  //     @RequestParam String phoneno,
+  //     @RequestParam String registercompanyname,
+  //     @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
+  //     @RequestParam(value = "signature", required = false) MultipartFile signature,
+  //     @RequestParam(value = "companylogo", required = false) MultipartFile companylogo,
+  //     @RequestParam String status,
+  //     @RequestParam String companyurl,
+  //     @RequestParam String address,
+  //     @RequestParam String cinno) {
+  //   try {
+  //     Optional<Subadmin> subAdminOpt = subAdminRepo.findById(id);
+  //     if (!subAdminOpt.isPresent()) {
+  //       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("SubAdmin with ID " + id + " not found.");
+  //     }
+  //     Subadmin subAdmin = subAdminOpt.get();
+  //     subAdmin.setName(name);
+  //     subAdmin.setLastname(lastname);
+  //     subAdmin.setEmail(email);
+  //     subAdmin.setPhoneno(phoneno);
+  //     subAdmin.setRegistercompanyname(registercompanyname);
+  //     subAdmin.setStatus(status);
+  //     subAdmin.setAddress(address);
+  //     subAdmin.setCinno(cinno);
+  //     subAdmin.setCompanyurl(companyurl);
+
+  //     // Update file fields only if provided
+  //     if (stampImg != null && !stampImg.isEmpty())
+  //       subAdmin.setStampImg(stampImg.getOriginalFilename());
+  //     if (signature != null && !signature.isEmpty())
+  //       subAdmin.setSignature(signature.getOriginalFilename());
+  //     if (companylogo != null && !companylogo.isEmpty())
+  //       subAdmin.setCompanylogo(companylogo.getOriginalFilename());
+
+  //     Subadmin updatedSubAdmin = subAdminRepo.save(subAdmin);
+  //     return ResponseEntity.ok(updatedSubAdmin);
+  //   } catch (RuntimeException ex) {
+  //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+  //   }
+  // }
+
   @PutMapping("/update-fields/{id}")
   public ResponseEntity<?> updateSubAdminFields(
       @PathVariable int id,
@@ -678,43 +725,44 @@ public class SubAdminController {
       @RequestParam String email,
       @RequestParam String phoneno,
       @RequestParam String registercompanyname,
-      @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
-      @RequestParam(value = "signature", required = false) MultipartFile signature,
-      @RequestParam(value = "companylogo", required = false) MultipartFile companylogo,
       @RequestParam String status,
       @RequestParam String companyurl,
       @RequestParam String address,
-      @RequestParam String cinno) {
+      @RequestParam String cinno,
+      @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
+      @RequestParam(value = "signature", required = false) MultipartFile signature,
+      @RequestParam(value = "companylogo", required = false) MultipartFile companylogo
+  ) {
+    // Make sure they exist
+    Optional<Subadmin> existing = subAdminRepo.findById(id);
+    if (!existing.isPresent()) {
+      return ResponseEntity
+          .status(HttpStatus.NOT_FOUND)
+          .body("SubAdmin with ID " + id + " not found.");
+    }
+
     try {
-      Optional<Subadmin> subAdminOpt = subAdminRepo.findById(id);
-      if (!subAdminOpt.isPresent()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("SubAdmin with ID " + id + " not found.");
-      }
-      Subadmin subAdmin = subAdminOpt.get();
-      subAdmin.setName(name);
-      subAdmin.setLastname(lastname);
-      subAdmin.setEmail(email);
-      subAdmin.setPhoneno(phoneno);
-      subAdmin.setRegistercompanyname(registercompanyname);
-      subAdmin.setStatus(status);
-      subAdmin.setAddress(address);
-      subAdmin.setCinno(cinno);
-      subAdmin.setCompanyurl(companyurl);
+      Subadmin updated = subAdminService.updateSubAdmin(
+          id,
+          name, lastname, email, phoneno,
+          registercompanyname,
+          status,
+          cinno,
+          companyurl,
+          address,
+          stampImg,
+          signature,
+          companylogo
+      );
+      return ResponseEntity.ok(updated);
 
-      // Update file fields only if provided
-      if (stampImg != null && !stampImg.isEmpty())
-        subAdmin.setStampImg(stampImg.getOriginalFilename());
-      if (signature != null && !signature.isEmpty())
-        subAdmin.setSignature(signature.getOriginalFilename());
-      if (companylogo != null && !companylogo.isEmpty())
-        subAdmin.setCompanylogo(companylogo.getOriginalFilename());
-
-      Subadmin updatedSubAdmin = subAdminRepo.save(subAdmin);
-      return ResponseEntity.ok(updatedSubAdmin);
     } catch (RuntimeException ex) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+      return ResponseEntity
+          .status(HttpStatus.BAD_REQUEST)
+          .body("Update failed: " + ex.getMessage());
     }
   }
+
 
   // Endpoint for updating SubAdmin status
   @PutMapping("/update-status/{id}")

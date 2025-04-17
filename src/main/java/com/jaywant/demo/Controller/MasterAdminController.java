@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/masteradmin")
-@CrossOrigin(origins = "*")
+// @CrossOrigin(origins = "*")
 public class MasterAdminController {
 
   @Autowired

@@ -28,7 +28,7 @@ import com.jaywant.demo.Service.SalaryService;
 
 @RestController
 @RequestMapping("/api/employee")
-@CrossOrigin(origins = "*")
+// @CrossOrigin(origins = "*")
 public class EmployeeController {
 
   @Autowired
@@ -246,34 +246,34 @@ public class EmployeeController {
           .body("No employees found for SubAdmin ID: " + subadminId);
     }
     return ResponseEntity.ok(employees);
-   }
+  }
 
   // @PutMapping("/{subAdminId}/{fullName}/attendance/update/bulk")
   // public ResponseEntity<?> updateBulkAttendance(@PathVariable int subAdminId,
-  //     @PathVariable String fullName,
-  //     @RequestBody List<Attendance> attendances) {
-  //   try {
-  //     List<Attendance> updated = attendanceService.updateAttendance(subAdminId, fullName, attendances);
-  //     return ResponseEntity.ok(updated);
-  //   } catch (RuntimeException e) {
-  //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-  //   }
+  // @PathVariable String fullName,
+  // @RequestBody List<Attendance> attendances) {
+  // try {
+  // List<Attendance> updated = attendanceService.updateAttendance(subAdminId,
+  // fullName, attendances);
+  // return ResponseEntity.ok(updated);
+  // } catch (RuntimeException e) {
+  // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  // }
   // }
 
   // @PostMapping("/{subAdminId}/{fullName}/attendance/add/bulk")
   // public ResponseEntity<?> addAttendances(@PathVariable int subAdminId,
-  //     @PathVariable String fullName,
-  //     @RequestBody List<Attendance> attendances) {
-  //   try {
-  //     List<Attendance> saved = attendanceService.addAttendance(subAdminId, fullName, attendances);
-  //     return ResponseEntity.ok(saved);
-  //   } catch (RuntimeException e) {
-  //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-  //   }
+  // @PathVariable String fullName,
+  // @RequestBody List<Attendance> attendances) {
+  // try {
+  // List<Attendance> saved = attendanceService.addAttendance(subAdminId,
+  // fullName, attendances);
+  // return ResponseEntity.ok(saved);
+  // } catch (RuntimeException e) {
+  // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  // }
   // }
 
-
-  
   /**
    * Bulk update attendance endpoint.
    * URL: POST /api/employee/{subAdminId}/{fullName}/attendance/update/bulk
