@@ -86,6 +86,7 @@ public class Employee {
   private List<Attendance> attendance;
 
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @JsonManagedReference("emp-cert")
   private List<Certificate> certificates = new ArrayList<>();
 
   public List<Certificate> getCertificates() {

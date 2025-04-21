@@ -59,7 +59,7 @@ public class Subadmin {
     private MasterAdmin masterAdmin;
 
     @OneToMany(mappedBy = "subadmin", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonBackReference("sub–emp")
     private List<Employee> employee;
 
     public int getId() {

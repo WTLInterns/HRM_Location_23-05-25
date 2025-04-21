@@ -1,5 +1,7 @@
 package com.jaywant.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +16,7 @@ public class Certificate {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "employee_id")
+  @JsonBackReference("emp-cert")
   private Employee employee;
 
   // getters & setters

@@ -19,8 +19,6 @@ public class Attendance {
   private String date;
   private String status;
 
-
-
   @ManyToOne
   @JoinColumn(name = "employee_id")
   @JsonBackReference
