@@ -336,13 +336,14 @@ public class SubAdminService {
     subAdmin.setCompanyurl(companyurl);
     subAdmin.setAddress(address);
 
-    if (cinno != null && !cinno.isEmpty()) {
+    // Update optional files when provided
+    if (stampImg != null && !stampImg.isEmpty()) {
       subAdmin.setStampImg(saveFile(stampImg));
     }
-    if (companyurl != null && !companyurl.isEmpty()) {
+    if (signature != null && !signature.isEmpty()) {
       subAdmin.setSignature(saveFile(signature));
     }
-    if (address != null && !address.isEmpty()) {
+    if (companylogo != null && !companylogo.isEmpty()) {
       subAdmin.setCompanylogo(saveFile(companylogo));
     }
 

@@ -608,6 +608,8 @@
 
 package com.jaywant.demo.Controller;
 
+import java.awt.PageAttributes;
+
 import com.jaywant.demo.Entity.Employee;
 import com.jaywant.demo.Entity.Subadmin;
 import com.jaywant.demo.Repo.SubAdminRepo;
@@ -631,6 +633,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import com.jaywant.demo.Repo.EmployeeRepo;
 
 @RestController
@@ -723,7 +726,7 @@ public class SubAdminController {
   // }
   // }
 
-  @PutMapping("/update-fields/{id}")
+  @PutMapping(value = "/update-fields/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> updateSubAdminFields(
       @PathVariable int id,
       @RequestParam String name,
@@ -738,7 +741,6 @@ public class SubAdminController {
       @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
       @RequestParam(value = "signature", required = false) MultipartFile signature,
       @RequestParam(value = "companylogo", required = false) MultipartFile companylogo) {
-    // Make sure they exist
     Optional<Subadmin> existing = subAdminRepo.findById(id);
     if (!existing.isPresent()) {
       return ResponseEntity
@@ -768,7 +770,7 @@ public class SubAdminController {
   }
 
   // Endpoint for updating SubAdmin status
-  @PutMapping("/update-status/{id}")
+  @PutMapping(value = "/update-status/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> updateSubAdminStatus(@PathVariable int id, @RequestParam String status) {
     try {
       Optional<Subadmin> subAdminOpt = subAdminRepo.findById(id);
