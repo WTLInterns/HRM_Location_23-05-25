@@ -1,7 +1,10 @@
 package com.jaywant.demo.Controller;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,16 +18,22 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import com.jaywant.demo.DTO.SalaryDTO;
 import com.jaywant.demo.Entity.Attendance;
 import com.jaywant.demo.Entity.Employee;
+import com.jaywant.demo.Entity.Subadmin;
 import com.jaywant.demo.Repo.AttendanceRepo;
 import com.jaywant.demo.Repo.EmployeeRepo;
+import com.jaywant.demo.Repo.SubAdminRepo;
 import com.jaywant.demo.Service.AttendanceService;
 import com.jaywant.demo.Service.EmployeeService;
 import com.jaywant.demo.Service.SalaryService;
+import com.jaywant.demo.Service.SubAdminService;
 
 @RestController
 @RequestMapping("/api/employee")
@@ -45,6 +54,12 @@ public class EmployeeController {
 
   @Autowired
   private SalaryService salaryService;
+
+  @Autowired
+  private SubAdminRepo subAdminRepo;
+
+  @Autowired
+  private SubAdminService subAdminService;
 
   // =====================================================
   // Attendance Endpoints
@@ -128,48 +143,64 @@ public class EmployeeController {
   // attendances);
   // }
 
-  @PutMapping("/{subadminId}/update/{empId}")
-  public ResponseEntity<?> updateEmployee(@PathVariable int subadminId,
-      @PathVariable int empId,
-      @RequestBody Employee updatedEmployeeData) {
+  /**
+   * Update Employee by fullName (with optional new images).
+   */
+  @PutMapping(value = "/update-employee/{subadminId}/{fullName:.+}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<?> updateEmployeeByFullName(
+      @PathVariable int subadminId,
+      @PathVariable String fullName,
 
-    Optional<Employee> optionalEmployee = employeeRepository.findById(empId);
-    if (optionalEmployee.isEmpty()) {
+      // scalar fields
+      @RequestParam String firstName,
+      @RequestParam String lastName,
+      @RequestParam String email,
+      @RequestParam Long phone,
+      @RequestParam String aadharNo,
+      @RequestParam String panCard,
+      @RequestParam String education,
+      @RequestParam String bloodGroup,
+      @RequestParam String jobRole,
+      @RequestParam String gender,
+      @RequestParam String address,
+      @RequestParam String birthDate,
+      @RequestParam String joiningDate,
+      @RequestParam String status,
+      @RequestParam String bankName,
+      @RequestParam String bankAccountNo,
+      @RequestParam String bankIfscCode,
+      @RequestParam String branchName,
+      @RequestParam Long salary,
+
+      // image parts
+      @RequestPart(required = false) MultipartFile empimg,
+      @RequestPart(required = false) MultipartFile adharimg,
+      @RequestPart(required = false) MultipartFile panimg) {
+    // 1) find the employee by subadmin + fullName
+    Employee existing = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+    if (existing == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body("Employee not found for ID: " + empId);
+          .body("No employee named '" + fullName + "' under SubAdmin " + subadminId);
     }
 
-    Employee existingEmployee = optionalEmployee.get();
+    try {
+      // 2) delegate to your service using the empId you just found
+      Employee updated = subAdminService.updateEmployee(
+          subadminId,
+          existing.getEmpId(), // <-- use the real ID
+          firstName, lastName, email, phone,
+          aadharNo, panCard, education, bloodGroup,
+          jobRole, gender, address,
+          birthDate, joiningDate, status,
+          bankName, bankAccountNo, bankIfscCode,
+          branchName, salary,
+          empimg, adharimg, panimg);
+      return ResponseEntity.ok(updated);
 
-    // Check subadmin ownership
-    if (existingEmployee.getSubadmin() == null || existingEmployee.getSubadmin().getId() != subadminId) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-          .body("Employee does not belong to SubAdmin ID: " + subadminId);
+    } catch (RuntimeException ex) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body("Error updating employee: " + ex.getMessage());
     }
-
-    // Update fields
-    existingEmployee.setFirstName(updatedEmployeeData.getFirstName());
-    existingEmployee.setLastName(updatedEmployeeData.getLastName());
-    existingEmployee.setEmail(updatedEmployeeData.getEmail());
-    existingEmployee.setPhone(updatedEmployeeData.getPhone());
-    existingEmployee.setAadharNo(updatedEmployeeData.getAadharNo());
-    existingEmployee.setPanCard(updatedEmployeeData.getPanCard());
-    existingEmployee.setEducation(updatedEmployeeData.getEducation());
-    existingEmployee.setBloodGroup(updatedEmployeeData.getBloodGroup());
-    existingEmployee.setJobRole(updatedEmployeeData.getJobRole());
-    existingEmployee.setGender(updatedEmployeeData.getGender());
-    existingEmployee.setAddress(updatedEmployeeData.getAddress());
-    existingEmployee.setBirthDate(updatedEmployeeData.getBirthDate());
-    existingEmployee.setJoiningDate(updatedEmployeeData.getJoiningDate());
-    existingEmployee.setStatus(updatedEmployeeData.getStatus());
-    existingEmployee.setBankName(updatedEmployeeData.getBankName());
-    existingEmployee.setBankAccountNo(updatedEmployeeData.getBankAccountNo());
-    existingEmployee.setBankIfscCode(updatedEmployeeData.getBankIfscCode());
-    existingEmployee.setBranchName(updatedEmployeeData.getBranchName());
-    existingEmployee.setSalary(updatedEmployeeData.getSalary());
-
-    Employee savedEmployee = employeeRepository.save(existingEmployee);
-    return ResponseEntity.ok(savedEmployee);
   }
 
   /**

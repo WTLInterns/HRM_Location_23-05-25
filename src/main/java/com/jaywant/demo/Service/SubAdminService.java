@@ -148,7 +148,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.jaywant.demo.Entity.Employee;
 import com.jaywant.demo.Entity.Subadmin;
+import com.jaywant.demo.Repo.EmployeeRepo;
 import com.jaywant.demo.Repo.SubAdminRepo;
 
 @Service
@@ -157,7 +160,144 @@ public class SubAdminService {
   @Autowired
   private SubAdminRepo repo;
 
+  @Autowired
+  private EmployeeRepo employeeRepo;
+
   private final String uploadDir = "src/main/resources/static/images/profile/";
+
+  public Employee addEmployee(
+      int subadminId,
+      String firstName,
+      String lastName,
+      String email,
+      Long phone,
+      String aadharNo,
+      String panCard,
+      String education,
+      String bloodGroup,
+      String jobRole,
+      String gender,
+      String address,
+      String birthDate,
+      String joiningDate,
+      String status,
+      String bankName,
+      String bankAccountNo,
+      String bankIfscCode,
+      String branchName,
+      Long salary,
+      MultipartFile empimg,
+      MultipartFile adharimg,
+      MultipartFile panimg) {
+    Subadmin subadmin = repo.findById(subadminId)
+        .orElseThrow(() -> new RuntimeException("Subadmin not found with ID: " + subadminId));
+
+    Employee e = new Employee();
+    e.setFirstName(firstName);
+    e.setLastName(lastName);
+    e.setEmail(email);
+    e.setPhone(phone);
+    e.setAadharNo(aadharNo);
+    e.setPanCard(panCard);
+    e.setEducation(education);
+    e.setBloodGroup(bloodGroup);
+    e.setJobRole(jobRole);
+    e.setGender(gender);
+    e.setAddress(address);
+    e.setBirthDate(birthDate);
+    e.setJoiningDate(joiningDate);
+    e.setStatus(status);
+    e.setBankName(bankName);
+    e.setBankAccountNo(bankAccountNo);
+    e.setBankIfscCode(bankIfscCode);
+    e.setBranchName(branchName);
+    e.setSalary(salary);
+    e.setRole("EMPLOYEE");
+    e.setSubadmin(subadmin);
+
+    // save each image if present
+    if (empimg != null && !empimg.isEmpty()) {
+      e.setEmpimg(saveFile(empimg));
+    }
+    if (adharimg != null && !adharimg.isEmpty()) {
+      e.setAdharimg(saveFile(adharimg));
+    }
+    if (panimg != null && !panimg.isEmpty()) {
+      e.setPanimg(saveFile(panimg));
+    }
+
+    return employeeRepo.save(e);
+  }
+
+  public Employee updateEmployee(
+      int subadminId,
+      int empId,
+      String firstName,
+      String lastName,
+      String email,
+      Long phone,
+      String aadharNo,
+      String panCard,
+      String education,
+      String bloodGroup,
+      String jobRole,
+      String gender,
+      String address,
+      String birthDate,
+      String joiningDate,
+      String status,
+      String bankName,
+      String bankAccountNo,
+      String bankIfscCode,
+      String branchName,
+      Long salary,
+      MultipartFile empimg,
+      MultipartFile adharimg,
+      MultipartFile panimg) {
+    Employee e = employeeRepo.findById(empId)
+        .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + empId));
+
+    if (e.getSubadmin() == null || e.getSubadmin().getId() != subadminId) {
+      throw new RuntimeException("Cannot update employee not under this Subadmin");
+    }
+
+    // update all scalar fields
+    e.setFirstName(firstName);
+    e.setLastName(lastName);
+    e.setEmail(email);
+    e.setPhone(phone);
+    e.setAadharNo(aadharNo);
+    e.setPanCard(panCard);
+    e.setEducation(education);
+    e.setBloodGroup(bloodGroup);
+    e.setJobRole(jobRole);
+    e.setGender(gender);
+    e.setAddress(address);
+    e.setBirthDate(birthDate);
+    e.setJoiningDate(joiningDate);
+    e.setStatus(status);
+    e.setBankName(bankName);
+    e.setBankAccountNo(bankAccountNo);
+    e.setBankIfscCode(bankIfscCode);
+    e.setBranchName(branchName);
+    e.setSalary(salary);
+
+    // always preserve role
+    e.setRole("EMPLOYEE");
+
+    // update images if provided
+    if (empimg != null && !empimg.isEmpty()) {
+      e.setEmpimg(saveFile(empimg));
+    }
+    if (adharimg != null && !adharimg.isEmpty()) {
+      e.setAdharimg(saveFile(adharimg));
+    }
+    if (panimg != null && !panimg.isEmpty()) {
+      e.setPanimg(saveFile(panimg));
+    }
+
+    return employeeRepo.save(e);
+  }
 
   // Get Subadmin by email
   public Subadmin getSubAdminByEmail(String email) {

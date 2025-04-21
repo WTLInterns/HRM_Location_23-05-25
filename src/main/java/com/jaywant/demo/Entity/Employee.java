@@ -1,12 +1,15 @@
 package com.jaywant.demo.Entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,17 +44,57 @@ public class Employee {
   private String bankIfscCode;
   private String branchName;
   private Long salary;
-  // private String password;
+  private String empimg;
+
+  public String getEmpimg() {
+    return empimg;
+  }
+
+  public void setEmpimg(String empimg) {
+    this.empimg = empimg;
+  }
+
+  public String getAdharimg() {
+    return adharimg;
+  }
+
+  public void setAdharimg(String adharimg) {
+    this.adharimg = adharimg;
+  }
+
+  public String getPanimg() {
+    return panimg;
+  }
+
+  public void setPanimg(String panimg) {
+    this.panimg = panimg;
+  }
+
+  private String adharimg;
+  private String panimg;
+
   private String role = "EMPLOYEE";
 
   @ManyToOne
   @JoinColumn(name = "subadmin_id")
-  @JsonBackReference
+  // @JsonBackReference
+  @JsonIgnoreProperties({ "employees" })
   private Subadmin subadmin;
 
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
   @JsonManagedReference
   private List<Attendance> attendance;
+
+  @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Certificate> certificates = new ArrayList<>();
+
+  public List<Certificate> getCertificates() {
+    return certificates;
+  }
+
+  public void setCertificates(List<Certificate> certificates) {
+    this.certificates = certificates;
+  }
 
   public int getEmpId() {
     return empId;

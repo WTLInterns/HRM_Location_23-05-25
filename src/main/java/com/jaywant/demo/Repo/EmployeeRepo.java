@@ -5,9 +5,11 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.jaywant.demo.Entity.Employee;
+import com.jaywant.demo.Entity.Subadmin;
 
 @Repository
 public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
@@ -28,5 +30,11 @@ public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
     Optional<Employee> findByEmail(String email);
 
     List<Employee> findBySubadminId(int subadminId);
+
+    @Query("SELECT e FROM Employee e WHERE e.subadmin = :subadmin AND LOWER(TRIM(e.firstName)) = LOWER(TRIM(:firstName)) AND LOWER(TRIM(e.lastName)) = LOWER(TRIM(:lastName))")
+    Employee findBySubadminAndFirstNameAndLastNameIgnoreCase(
+            @Param("subadmin") Subadmin subadmin,
+            @Param("firstName") String firstName,
+            @Param("lastName") String lastName);
 
 }

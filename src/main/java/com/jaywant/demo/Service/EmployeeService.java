@@ -31,6 +31,10 @@ public class EmployeeService {
     return employeeRepo.findByFullName(fullName);
   }
 
+  public Employee findBySubadminIdAndFullName(int subadminId, String employeeFullName) {
+    return employeeRepo.findBySubadminIdAndFullName(subadminId, employeeFullName);
+  }
+
   public List<Attendance> addAttendance(int subAdminId, String fullName, List<Attendance> attendances) {
     Employee emp = employeeRepo.findByFullName(fullName);
     Subadmin subadmin = subAdminRepo.findById(subAdminId).orElse(null);

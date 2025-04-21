@@ -614,11 +614,15 @@ import com.jaywant.demo.Repo.SubAdminRepo;
 import com.jaywant.demo.Service.SubAdminPasswordResetService;
 import com.jaywant.demo.Service.SubAdminService;
 import com.jaywant.demo.Service.EmailService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import org.springframework.http.MediaType;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -673,48 +677,50 @@ public class SubAdminController {
   // Endpoint for updating SubAdmin fields including status and image files.
   // @PutMapping("/update-fields/{id}")
   // public ResponseEntity<?> updateSubAdminFields(
-  //     @PathVariable int id,
-  //     @RequestParam String name,
-  //     @RequestParam String lastname,
-  //     @RequestParam String email,
-  //     @RequestParam String phoneno,
-  //     @RequestParam String registercompanyname,
-  //     @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
-  //     @RequestParam(value = "signature", required = false) MultipartFile signature,
-  //     @RequestParam(value = "companylogo", required = false) MultipartFile companylogo,
-  //     @RequestParam String status,
-  //     @RequestParam String companyurl,
-  //     @RequestParam String address,
-  //     @RequestParam String cinno) {
-  //   try {
-  //     Optional<Subadmin> subAdminOpt = subAdminRepo.findById(id);
-  //     if (!subAdminOpt.isPresent()) {
-  //       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("SubAdmin with ID " + id + " not found.");
-  //     }
-  //     Subadmin subAdmin = subAdminOpt.get();
-  //     subAdmin.setName(name);
-  //     subAdmin.setLastname(lastname);
-  //     subAdmin.setEmail(email);
-  //     subAdmin.setPhoneno(phoneno);
-  //     subAdmin.setRegistercompanyname(registercompanyname);
-  //     subAdmin.setStatus(status);
-  //     subAdmin.setAddress(address);
-  //     subAdmin.setCinno(cinno);
-  //     subAdmin.setCompanyurl(companyurl);
+  // @PathVariable int id,
+  // @RequestParam String name,
+  // @RequestParam String lastname,
+  // @RequestParam String email,
+  // @RequestParam String phoneno,
+  // @RequestParam String registercompanyname,
+  // @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
+  // @RequestParam(value = "signature", required = false) MultipartFile signature,
+  // @RequestParam(value = "companylogo", required = false) MultipartFile
+  // companylogo,
+  // @RequestParam String status,
+  // @RequestParam String companyurl,
+  // @RequestParam String address,
+  // @RequestParam String cinno) {
+  // try {
+  // Optional<Subadmin> subAdminOpt = subAdminRepo.findById(id);
+  // if (!subAdminOpt.isPresent()) {
+  // return ResponseEntity.status(HttpStatus.NOT_FOUND).body("SubAdmin with ID " +
+  // id + " not found.");
+  // }
+  // Subadmin subAdmin = subAdminOpt.get();
+  // subAdmin.setName(name);
+  // subAdmin.setLastname(lastname);
+  // subAdmin.setEmail(email);
+  // subAdmin.setPhoneno(phoneno);
+  // subAdmin.setRegistercompanyname(registercompanyname);
+  // subAdmin.setStatus(status);
+  // subAdmin.setAddress(address);
+  // subAdmin.setCinno(cinno);
+  // subAdmin.setCompanyurl(companyurl);
 
-  //     // Update file fields only if provided
-  //     if (stampImg != null && !stampImg.isEmpty())
-  //       subAdmin.setStampImg(stampImg.getOriginalFilename());
-  //     if (signature != null && !signature.isEmpty())
-  //       subAdmin.setSignature(signature.getOriginalFilename());
-  //     if (companylogo != null && !companylogo.isEmpty())
-  //       subAdmin.setCompanylogo(companylogo.getOriginalFilename());
+  // // Update file fields only if provided
+  // if (stampImg != null && !stampImg.isEmpty())
+  // subAdmin.setStampImg(stampImg.getOriginalFilename());
+  // if (signature != null && !signature.isEmpty())
+  // subAdmin.setSignature(signature.getOriginalFilename());
+  // if (companylogo != null && !companylogo.isEmpty())
+  // subAdmin.setCompanylogo(companylogo.getOriginalFilename());
 
-  //     Subadmin updatedSubAdmin = subAdminRepo.save(subAdmin);
-  //     return ResponseEntity.ok(updatedSubAdmin);
-  //   } catch (RuntimeException ex) {
-  //     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-  //   }
+  // Subadmin updatedSubAdmin = subAdminRepo.save(subAdmin);
+  // return ResponseEntity.ok(updatedSubAdmin);
+  // } catch (RuntimeException ex) {
+  // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+  // }
   // }
 
   @PutMapping("/update-fields/{id}")
@@ -731,8 +737,7 @@ public class SubAdminController {
       @RequestParam String cinno,
       @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
       @RequestParam(value = "signature", required = false) MultipartFile signature,
-      @RequestParam(value = "companylogo", required = false) MultipartFile companylogo
-  ) {
+      @RequestParam(value = "companylogo", required = false) MultipartFile companylogo) {
     // Make sure they exist
     Optional<Subadmin> existing = subAdminRepo.findById(id);
     if (!existing.isPresent()) {
@@ -752,8 +757,7 @@ public class SubAdminController {
           address,
           stampImg,
           signature,
-          companylogo
-      );
+          companylogo);
       return ResponseEntity.ok(updated);
 
     } catch (RuntimeException ex) {
@@ -762,7 +766,6 @@ public class SubAdminController {
           .body("Update failed: " + ex.getMessage());
     }
   }
-
 
   // Endpoint for updating SubAdmin status
   @PutMapping("/update-status/{id}")
@@ -870,9 +873,75 @@ public class SubAdminController {
   }
 
   // --- New Endpoint: Add Employee under a Subadmin ---
-  @PostMapping("/add-employee/{subadminId}")
+  // @PostMapping("/add-employee/{subadminId}")
+  // public ResponseEntity<?> addEmployee(
+  // @PathVariable("subadminId") int subadminId,
+  // @RequestParam String firstName,
+  // @RequestParam String lastName,
+  // @RequestParam String email,
+  // @RequestParam Long phone,
+  // @RequestParam String aadharNo,
+  // @RequestParam String panCard,
+  // @RequestParam String education,
+  // @RequestParam String bloodGroup,
+  // @RequestParam String jobRole,
+  // @RequestParam String gender,
+  // @RequestParam String address,
+  // @RequestParam String birthDate,
+  // @RequestParam String joiningDate,
+  // @RequestParam String status,
+  // @RequestParam String bankName,
+  // @RequestParam String bankAccountNo,
+  // @RequestParam String bankIfscCode,
+  // @RequestParam String branchName,
+  // @RequestParam Long salary) {
+  // try {
+  // // Find the subadmin by id
+  // Optional<Subadmin> subadminOpt = subAdminRepo.findById(subadminId);
+  // if (!subadminOpt.isPresent()) {
+  // return ResponseEntity.status(HttpStatus.NOT_FOUND)
+  // .body("Subadmin with ID " + subadminId + " not found.");
+  // }
+  // Subadmin subadmin = subadminOpt.get();
+
+  // // Create and map Employee fields
+  // Employee employee = new Employee();
+  // employee.setFirstName(firstName);
+  // employee.setLastName(lastName);
+  // employee.setEmail(email);
+  // employee.setPhone(phone);
+  // employee.setAadharNo(aadharNo);
+  // employee.setPanCard(panCard);
+  // employee.setEducation(education);
+  // employee.setBloodGroup(bloodGroup);
+  // employee.setJobRole(jobRole);
+  // employee.setGender(gender);
+  // employee.setAddress(address);
+  // employee.setBirthDate(birthDate);
+  // employee.setJoiningDate(joiningDate);
+  // employee.setStatus(status);
+  // employee.setBankName(bankName);
+  // employee.setBankAccountNo(bankAccountNo);
+  // employee.setBankIfscCode(bankIfscCode);
+  // employee.setBranchName(branchName);
+  // employee.setSalary(salary);
+  // employee.setRole("EMPLOYEE");
+
+  // // Set the subadmin relationship
+  // employee.setSubadmin(subadmin);
+
+  // // Save the employee using employeeRepo
+  // Employee savedEmployee = employeeRepo.save(employee);
+  // return ResponseEntity.ok(savedEmployee);
+  // } catch (Exception ex) {
+  // return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+  // .body("Error while adding employee: " + ex.getMessage());
+  // }
+  // }
+
+  @PostMapping(value = "/add-employee/{subadminId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<?> addEmployee(
-      @PathVariable("subadminId") int subadminId,
+      @PathVariable int subadminId,
       @RequestParam String firstName,
       @RequestParam String lastName,
       @RequestParam String email,
@@ -891,48 +960,22 @@ public class SubAdminController {
       @RequestParam String bankAccountNo,
       @RequestParam String bankIfscCode,
       @RequestParam String branchName,
-      @RequestParam Long salary) {
+      @RequestParam Long salary,
+      @RequestPart(required = false) MultipartFile empimg,
+      @RequestPart(required = false) MultipartFile adharimg,
+      @RequestPart(required = false) MultipartFile panimg) {
     try {
-      // Find the subadmin by id
-      Optional<Subadmin> subadminOpt = subAdminRepo.findById(subadminId);
-      if (!subadminOpt.isPresent()) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body("Subadmin with ID " + subadminId + " not found.");
-      }
-      Subadmin subadmin = subadminOpt.get();
-
-      // Create and map Employee fields
-      Employee employee = new Employee();
-      employee.setFirstName(firstName);
-      employee.setLastName(lastName);
-      employee.setEmail(email);
-      employee.setPhone(phone);
-      employee.setAadharNo(aadharNo);
-      employee.setPanCard(panCard);
-      employee.setEducation(education);
-      employee.setBloodGroup(bloodGroup);
-      employee.setJobRole(jobRole);
-      employee.setGender(gender);
-      employee.setAddress(address);
-      employee.setBirthDate(birthDate);
-      employee.setJoiningDate(joiningDate);
-      employee.setStatus(status);
-      employee.setBankName(bankName);
-      employee.setBankAccountNo(bankAccountNo);
-      employee.setBankIfscCode(bankIfscCode);
-      employee.setBranchName(branchName);
-      employee.setSalary(salary);
-      employee.setRole("EMPLOYEE");
-
-      // Set the subadmin relationship
-      employee.setSubadmin(subadmin);
-
-      // Save the employee using employeeRepo
-      Employee savedEmployee = employeeRepo.save(employee);
-      return ResponseEntity.ok(savedEmployee);
-    } catch (Exception ex) {
+      Employee created = subAdminService.addEmployee(
+          subadminId,
+          firstName, lastName, email, phone, aadharNo, panCard,
+          education, bloodGroup, jobRole, gender, address,
+          birthDate, joiningDate, status, bankName,
+          bankAccountNo, bankIfscCode, branchName, salary,
+          empimg, adharimg, panimg);
+      return ResponseEntity.ok(created);
+    } catch (RuntimeException ex) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body("Error while adding employee: " + ex.getMessage());
+          .body("Error adding employee: " + ex.getMessage());
     }
   }
 
