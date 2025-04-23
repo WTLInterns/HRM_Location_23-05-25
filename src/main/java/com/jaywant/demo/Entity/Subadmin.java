@@ -1,5 +1,6 @@
 package com.jaywant.demo.Entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -61,6 +62,19 @@ public class Subadmin {
     @OneToMany(mappedBy = "subadmin", cascade = CascadeType.ALL)
     @JsonBackReference("sub–emp")
     private List<Employee> employee;
+
+    @OneToMany(mappedBy = "subadmin", cascade = CascadeType.ALL)
+    @JsonManagedReference("subadmin-certificate")
+    private List<Certificate> certificates = new ArrayList<>();
+
+    // Add getter and setter
+    public List<Certificate> getCertificates() {
+        return certificates;
+    }
+
+    public void setCertificates(List<Certificate> certificates) {
+        this.certificates = certificates;
+    }
 
     public int getId() {
         return id;
