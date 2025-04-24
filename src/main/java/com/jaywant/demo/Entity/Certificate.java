@@ -90,7 +90,7 @@ public class Certificate {
   // Employee relationship
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "employee_id")
-  @JsonBackReference("employee-certificate")
+  @JsonBackReference("emp-cert")
   private Employee employee;
 
   // Subadmin relationship

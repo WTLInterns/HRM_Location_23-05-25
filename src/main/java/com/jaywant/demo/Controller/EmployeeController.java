@@ -171,6 +171,7 @@ public class EmployeeController {
       @RequestParam String bankIfscCode,
       @RequestParam String branchName,
       @RequestParam Long salary,
+      @RequestParam String department,
 
       // image parts
       @RequestPart(required = false) MultipartFile empimg,
@@ -194,7 +195,7 @@ public class EmployeeController {
           birthDate, joiningDate, status,
           bankName, bankAccountNo, bankIfscCode,
           branchName, salary,
-          empimg, adharimg, panimg);
+          empimg, adharimg, panimg, department);
       return ResponseEntity.ok(updated);
 
     } catch (RuntimeException ex) {

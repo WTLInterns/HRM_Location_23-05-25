@@ -188,7 +188,8 @@ public class SubAdminService {
       Long salary,
       MultipartFile empimg,
       MultipartFile adharimg,
-      MultipartFile panimg) {
+      MultipartFile panimg,
+      String department) {
     Subadmin subadmin = repo.findById(subadminId)
         .orElseThrow(() -> new RuntimeException("Subadmin not found with ID: " + subadminId));
 
@@ -212,6 +213,7 @@ public class SubAdminService {
     e.setBankIfscCode(bankIfscCode);
     e.setBranchName(branchName);
     e.setSalary(salary);
+    e.setDepartment(department);
     e.setRole("EMPLOYEE");
     e.setSubadmin(subadmin);
 
@@ -253,7 +255,8 @@ public class SubAdminService {
       Long salary,
       MultipartFile empimg,
       MultipartFile adharimg,
-      MultipartFile panimg) {
+      MultipartFile panimg,
+      String department) {
     Employee e = employeeRepo.findById(empId)
         .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + empId));
 
@@ -281,7 +284,7 @@ public class SubAdminService {
     e.setBankIfscCode(bankIfscCode);
     e.setBranchName(branchName);
     e.setSalary(salary);
-
+    e.setDepartment(department);
     // always preserve role
     e.setRole("EMPLOYEE");
 

@@ -3,7 +3,7 @@ package com.jaywant.demo.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -14,7 +14,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
@@ -45,6 +44,9 @@ public class Employee {
   private String branchName;
   private Long salary;
   private String empimg;
+  private String department;
+
+  
 
   public String getEmpimg() {
     return empimg;
@@ -82,7 +84,7 @@ public class Employee {
   private Subadmin subadmin;
 
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
-  @JsonManagedReference
+  @JsonIgnore
   private List<Attendance> attendance;
 
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -288,5 +290,22 @@ public class Employee {
   public void setAttendance(List<Attendance> attendance) {
     this.attendance = attendance;
   }
+
+
+
+
+    /**
+     * @return String return the department
+     */
+    public String getDepartment() {
+        return department;
+    }
+
+    /**
+     * @param department the department to set
+     */
+    public void setDepartment(String department) {
+        this.department = department;
+    }
 
 }

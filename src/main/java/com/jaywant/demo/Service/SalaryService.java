@@ -240,6 +240,7 @@ public class SalaryService {
         dto.setIfscCode(employee.getBankIfscCode());
         dto.setJobRole(employee.getJobRole());
         dto.setJoiningDate(employee.getJoiningDate()); // Using the corrected field name
+        dto.setDepartment(employee.getDepartment());
 
         dto.setWorkingDays(workingDays);
         dto.setPayableDays(payableDays);

@@ -965,7 +965,8 @@ public class SubAdminController {
       @RequestParam Long salary,
       @RequestPart(required = false) MultipartFile empimg,
       @RequestPart(required = false) MultipartFile adharimg,
-      @RequestPart(required = false) MultipartFile panimg) {
+      @RequestPart(required = false) MultipartFile panimg,
+      @RequestParam String department) {
     try {
       Employee created = subAdminService.addEmployee(
           subadminId,
@@ -973,7 +974,7 @@ public class SubAdminController {
           education, bloodGroup, jobRole, gender, address,
           birthDate, joiningDate, status, bankName,
           bankAccountNo, bankIfscCode, branchName, salary,
-          empimg, adharimg, panimg);
+          empimg, adharimg, panimg, department);
       return ResponseEntity.ok(created);
     } catch (RuntimeException ex) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
