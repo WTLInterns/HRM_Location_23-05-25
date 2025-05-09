@@ -1,15 +1,16 @@
 package com.jaywant.demo.Controller;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,12 +22,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.MediaType;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jaywant.demo.DTO.SalaryDTO;
 import com.jaywant.demo.Entity.Attendance;
 import com.jaywant.demo.Entity.Employee;
-import com.jaywant.demo.Entity.Subadmin;
 import com.jaywant.demo.Repo.AttendanceRepo;
 import com.jaywant.demo.Repo.EmployeeRepo;
 import com.jaywant.demo.Repo.SubAdminRepo;
@@ -310,35 +312,37 @@ public class EmployeeController {
    * Bulk update attendance endpoint.
    * URL: POST /api/employee/{subAdminId}/{fullName}/attendance/update/bulk
    */
-  @PutMapping("/{subAdminId}/{fullName}/attendance/update/bulk")
-  public ResponseEntity<?> updateBulkAttendance(
-      @PathVariable int subAdminId,
-      @PathVariable String fullName,
-      @RequestBody List<Attendance> attendances) {
-    try {
-      List<Attendance> updated = attendanceService.updateAttendance(subAdminId, fullName, attendances);
-      return ResponseEntity.ok(updated);
-    } catch (RuntimeException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    }
-  }
+  // @PutMapping("/{subAdminId}/{fullName}/attendance/update/bulk")
+  // public ResponseEntity<?> updateBulkAttendance(
+  // @PathVariable int subAdminId,
+  // @PathVariable String fullName,
+  // @RequestBody List<Attendance> attendances) {
+  // try {
+  // List<Attendance> updated = attendanceService.updateAttendance(subAdminId,
+  // fullName, attendances);
+  // return ResponseEntity.ok(updated);
+  // } catch (RuntimeException e) {
+  // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  // }
+  // }
 
   /**
    * Bulk add attendance endpoint.
    * URL: POST /api/employee/{subAdminId}/{fullName}/attendance/add/bulk
    */
-  @PostMapping("/{subAdminId}/{fullName}/attendance/add/bulk")
-  public ResponseEntity<?> addAttendances(
-      @PathVariable int subAdminId,
-      @PathVariable String fullName,
-      @RequestBody List<Attendance> attendances) {
-    try {
-      List<Attendance> saved = attendanceService.addAttendance(subAdminId, fullName, attendances);
-      return ResponseEntity.ok(saved);
-    } catch (RuntimeException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    }
-  }
+  // @PostMapping("/{subAdminId}/{fullName}/attendance/add/bulk")
+  // public ResponseEntity<?> addAttendances(
+  // @PathVariable int subAdminId,
+  // @PathVariable String fullName,
+  // @RequestBody List<Attendance> attendances) {
+  // try {
+  // List<Attendance> saved = attendanceService.addAttendance(subAdminId,
+  // fullName, attendances);
+  // return ResponseEntity.ok(saved);
+  // } catch (RuntimeException e) {
+  // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+  // }
+  // }
 
   @GetMapping("/bulk/{fullName}/{date}")
   public List<Attendance> getAttendancesBullk(@PathVariable String fullName, @PathVariable String date) {
@@ -347,4 +351,109 @@ public class EmployeeController {
 
   }
 
+  private static final List<String> REQUIRES_REASON = Arrays.asList("absent", "paidleave");
+
+  private boolean requiresReason(String status) {
+      if (status == null) return false;
+      String normalized = status.trim().toLowerCase().replaceAll("[ _]", "");
+      return REQUIRES_REASON.contains(normalized);
+  }
+
+  /**
+   * Bulk-add or single-add attendance endpoint.
+   * URL: POST /api/employee/{subadminId}/{fullName}/attendance/add/bulk
+   * Accepts either a JSON array or a single object.
+   */
+  @PostMapping("/{subadminId}/{fullName}/attendance/add/bulk")
+  public ResponseEntity<?> addOrUpdateAttendances(
+          @PathVariable int subadminId,
+          @PathVariable String fullName,
+          @RequestBody JsonNode payload) {
+      try {
+          List<Attendance> attendances;
+          ObjectMapper mapper = new ObjectMapper();
+          if (payload.isArray()) {
+              attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
+          } else {
+              Attendance att = mapper.treeToValue(payload, Attendance.class);
+              attendances = Collections.singletonList(att);
+          }
+          return processBatch(attendances, subadminId, fullName);
+      } catch (JsonProcessingException e) {
+          return ResponseEntity.badRequest().body("Invalid Attendance JSON payload");
+      }
+  }
+
+  /**
+   * Bulk-update or single-update attendance endpoint.
+   * URL: PUT /api/employee/{subadminId}/{fullName}/attendance/update/bulk
+   * Accepts either a JSON array or a single object.
+   */
+  @PutMapping("/{subadminId}/{fullName}/attendance/update/bulk")
+  public ResponseEntity<?> updateOrAddAttendances(
+          @PathVariable int subadminId,
+          @PathVariable String fullName,
+          @RequestBody JsonNode payload) {
+      try {
+          List<Attendance> attendances;
+          ObjectMapper mapper = new ObjectMapper();
+          if (payload.isArray()) {
+              attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
+          } else {
+              Attendance att = mapper.treeToValue(payload, Attendance.class);
+              attendances = Collections.singletonList(att);
+          }
+          return processBatch(attendances, subadminId, fullName);
+      } catch (JsonProcessingException e) {
+          return ResponseEntity.badRequest().body("Invalid Attendance JSON payload");
+      }
+  }
+
+  /**
+   * Shared logic: for each Attendance, if ID present or record exists for date, update; otherwise add new.
+   */
+  private ResponseEntity<?> processBatch(
+          List<Attendance> attendances,
+          int subadminId,
+          String fullName) {
+      Employee employee = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+      if (employee == null) {
+          return ResponseEntity.badRequest().body("Employee not found: " + fullName);
+      }
+
+      List<Attendance> toSave = new ArrayList<>();
+      for (Attendance att : attendances) {
+          if (requiresReason(att.getStatus()) && (att.getReason() == null || att.getReason().isBlank())) {
+              return ResponseEntity.badRequest()
+                      .body("Reason is required when status='" + att.getStatus()
+                              + "' for date " + att.getDate());
+          }
+          Attendance entity;
+          if (att.getId() != null) {
+              Optional<Attendance> opt = attendanceRepository.findById(att.getId());
+              if (opt.isEmpty()) {
+                  return ResponseEntity.badRequest().body("Attendance not found: ID " + att.getId());
+              }
+              entity = opt.get();
+          } else {
+              Optional<Attendance> byDate = attendanceRepository
+                      .findByEmployeeAndDate(employee, att.getDate());
+              entity = byDate.orElseGet(Attendance::new);
+              entity.setEmployee(employee);
+          }
+          if (entity.getId() != null &&
+              !Objects.equals(entity.getEmployee().getEmpId(), employee.getEmpId())) {
+              return ResponseEntity.badRequest()
+                      .body("Attendance record for date " + att.getDate()
+                              + " does not belong to " + fullName);
+          }
+          entity.setDate(att.getDate());
+          entity.setStatus(att.getStatus());
+          entity.setReason(att.getReason());
+          toSave.add(entity);
+      }
+
+      List<Attendance> saved = attendanceRepository.saveAll(toSave);
+      return ResponseEntity.ok(saved);
+  }
 }

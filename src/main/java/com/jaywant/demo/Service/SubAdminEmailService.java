@@ -28,7 +28,7 @@ public class SubAdminEmailService {
         + "We're excited to have you on board as a HRM-Sub-Admin. Your account has been created successfully. Below are your login credentials:\n\n"
         + "📧 Email: " + subAdmin.getEmail() + "\n"
         + "🔐 Password: " + subAdmin.getPassword() + "\n\n"
-        + "👉 Click here to log in: http://localhost:5173/login\n\n"
+        + "👉 Click here to log in: https://managifyhr.com\n\n"
         + "⚠️ Please change your password after your first login to ensure security.\n\n"
         + "If you face any issues, feel free to contact our support team.\n\n"
         + "Thanks & Regards,\n"

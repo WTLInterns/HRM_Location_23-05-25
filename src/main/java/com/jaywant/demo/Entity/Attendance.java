@@ -2,6 +2,7 @@ package com.jaywant.demo.Entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +19,16 @@ public class Attendance {
 
   private String date;
   private String status;
+  @Column(length = 500)
+  private String reason;
+
+  public String getReason() {
+    return reason;
+  }
+
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
 
   @ManyToOne
   @JoinColumn(name = "employee_id")
