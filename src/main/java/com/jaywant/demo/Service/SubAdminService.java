@@ -217,6 +217,8 @@ public class SubAdminService {
     e.setRole("EMPLOYEE");
     e.setSubadmin(subadmin);
 
+    e.setPassword(phone.toString());
+
     // save each image if present
     if (empimg != null && !empimg.isEmpty()) {
       e.setEmpimg(saveFile(empimg));
@@ -287,6 +289,8 @@ public class SubAdminService {
     e.setDepartment(department);
     // always preserve role
     e.setRole("EMPLOYEE");
+
+    e.setPassword(phone.toString());
 
     // update images if provided
     if (empimg != null && !empimg.isEmpty()) {

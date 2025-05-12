@@ -22,6 +22,43 @@ public class Attendance {
   @Column(length = 500)
   private String reason;
 
+  private String punchIn;
+  private String lunchPunchOut;
+  private String lunchPunchIn;
+  private String punchOut;
+
+  public String getPunchIn() {
+    return punchIn;
+  }
+
+  public void setPunchIn(String punchIn) {
+    this.punchIn = punchIn;
+  }
+
+  public String getLunchPunchOut() {
+    return lunchPunchOut;
+  }
+
+  public void setLunchPunchOut(String lunchPunchOut) {
+    this.lunchPunchOut = lunchPunchOut;
+  }
+
+  public String getLunchPunchIn() {
+    return lunchPunchIn;
+  }
+
+  public void setLunchPunchIn(String lunchPunchIn) {
+    this.lunchPunchIn = lunchPunchIn;
+  }
+
+  public String getPunchOut() {
+    return punchOut;
+  }
+
+  public void setPunchOut(String punchOut) {
+    this.punchOut = punchOut;
+  }
+
   public String getReason() {
     return reason;
   }

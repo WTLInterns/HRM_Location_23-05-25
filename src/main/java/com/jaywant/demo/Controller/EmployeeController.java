@@ -6,10 +6,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.springframework.http.MediaType;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,8 @@ import com.jaywant.demo.Repo.AttendanceRepo;
 import com.jaywant.demo.Repo.EmployeeRepo;
 import com.jaywant.demo.Repo.SubAdminRepo;
 import com.jaywant.demo.Service.AttendanceService;
+import com.jaywant.demo.Service.EmployeeEmailService;
+import com.jaywant.demo.Service.EmployeePasswordResetService;
 import com.jaywant.demo.Service.EmployeeService;
 import com.jaywant.demo.Service.SalaryService;
 import com.jaywant.demo.Service.SubAdminService;
@@ -354,9 +357,10 @@ public class EmployeeController {
   private static final List<String> REQUIRES_REASON = Arrays.asList("absent", "paidleave");
 
   private boolean requiresReason(String status) {
-      if (status == null) return false;
-      String normalized = status.trim().toLowerCase().replaceAll("[ _]", "");
-      return REQUIRES_REASON.contains(normalized);
+    if (status == null)
+      return false;
+    String normalized = status.trim().toLowerCase().replaceAll("[ _]", "");
+    return REQUIRES_REASON.contains(normalized);
   }
 
   /**
@@ -366,22 +370,22 @@ public class EmployeeController {
    */
   @PostMapping("/{subadminId}/{fullName}/attendance/add/bulk")
   public ResponseEntity<?> addOrUpdateAttendances(
-          @PathVariable int subadminId,
-          @PathVariable String fullName,
-          @RequestBody JsonNode payload) {
-      try {
-          List<Attendance> attendances;
-          ObjectMapper mapper = new ObjectMapper();
-          if (payload.isArray()) {
-              attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
-          } else {
-              Attendance att = mapper.treeToValue(payload, Attendance.class);
-              attendances = Collections.singletonList(att);
-          }
-          return processBatch(attendances, subadminId, fullName);
-      } catch (JsonProcessingException e) {
-          return ResponseEntity.badRequest().body("Invalid Attendance JSON payload");
+      @PathVariable int subadminId,
+      @PathVariable String fullName,
+      @RequestBody JsonNode payload) {
+    try {
+      List<Attendance> attendances;
+      ObjectMapper mapper = new ObjectMapper();
+      if (payload.isArray()) {
+        attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
+      } else {
+        Attendance att = mapper.treeToValue(payload, Attendance.class);
+        attendances = Collections.singletonList(att);
       }
+      return processBatch(attendances, subadminId, fullName);
+    } catch (JsonProcessingException e) {
+      return ResponseEntity.badRequest().body("Invalid Attendance JSON payload");
+    }
   }
 
   /**
@@ -391,69 +395,201 @@ public class EmployeeController {
    */
   @PutMapping("/{subadminId}/{fullName}/attendance/update/bulk")
   public ResponseEntity<?> updateOrAddAttendances(
-          @PathVariable int subadminId,
-          @PathVariable String fullName,
-          @RequestBody JsonNode payload) {
-      try {
-          List<Attendance> attendances;
-          ObjectMapper mapper = new ObjectMapper();
-          if (payload.isArray()) {
-              attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
-          } else {
-              Attendance att = mapper.treeToValue(payload, Attendance.class);
-              attendances = Collections.singletonList(att);
-          }
-          return processBatch(attendances, subadminId, fullName);
-      } catch (JsonProcessingException e) {
-          return ResponseEntity.badRequest().body("Invalid Attendance JSON payload");
+      @PathVariable int subadminId,
+      @PathVariable String fullName,
+      @RequestBody JsonNode payload) {
+    try {
+      List<Attendance> attendances;
+      ObjectMapper mapper = new ObjectMapper();
+      if (payload.isArray()) {
+        attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
+      } else {
+        Attendance att = mapper.treeToValue(payload, Attendance.class);
+        attendances = Collections.singletonList(att);
       }
+      return processBatch(attendances, subadminId, fullName);
+    } catch (JsonProcessingException e) {
+      return ResponseEntity.badRequest().body("Invalid Attendance JSON payload");
+    }
   }
 
   /**
-   * Shared logic: for each Attendance, if ID present or record exists for date, update; otherwise add new.
+   * Shared logic: for each Attendance, if ID present or record exists for date,
+   * update; otherwise add new.
    */
   private ResponseEntity<?> processBatch(
-          List<Attendance> attendances,
-          int subadminId,
-          String fullName) {
-      Employee employee = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
-      if (employee == null) {
-          return ResponseEntity.badRequest().body("Employee not found: " + fullName);
-      }
+      List<Attendance> attendances,
+      int subadminId,
+      String fullName) {
+    Employee employee = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+    if (employee == null) {
+      return ResponseEntity.badRequest().body("Employee not found: " + fullName);
+    }
 
-      List<Attendance> toSave = new ArrayList<>();
-      for (Attendance att : attendances) {
-          if (requiresReason(att.getStatus()) && (att.getReason() == null || att.getReason().isBlank())) {
-              return ResponseEntity.badRequest()
-                      .body("Reason is required when status='" + att.getStatus()
-                              + "' for date " + att.getDate());
-          }
-          Attendance entity;
-          if (att.getId() != null) {
-              Optional<Attendance> opt = attendanceRepository.findById(att.getId());
-              if (opt.isEmpty()) {
-                  return ResponseEntity.badRequest().body("Attendance not found: ID " + att.getId());
-              }
-              entity = opt.get();
-          } else {
-              Optional<Attendance> byDate = attendanceRepository
-                      .findByEmployeeAndDate(employee, att.getDate());
-              entity = byDate.orElseGet(Attendance::new);
-              entity.setEmployee(employee);
-          }
-          if (entity.getId() != null &&
-              !Objects.equals(entity.getEmployee().getEmpId(), employee.getEmpId())) {
-              return ResponseEntity.badRequest()
-                      .body("Attendance record for date " + att.getDate()
-                              + " does not belong to " + fullName);
-          }
-          entity.setDate(att.getDate());
-          entity.setStatus(att.getStatus());
-          entity.setReason(att.getReason());
-          toSave.add(entity);
+    List<Attendance> toSave = new ArrayList<>();
+    for (Attendance att : attendances) {
+      if (requiresReason(att.getStatus()) && (att.getReason() == null || att.getReason().isBlank())) {
+        return ResponseEntity.badRequest()
+            .body("Reason is required when status='" + att.getStatus()
+                + "' for date " + att.getDate());
       }
+      Attendance entity;
+      if (att.getId() != null) {
+        Optional<Attendance> opt = attendanceRepository.findById(att.getId());
+        if (opt.isEmpty()) {
+          return ResponseEntity.badRequest().body("Attendance not found: ID " + att.getId());
+        }
+        entity = opt.get();
+      } else {
+        Optional<Attendance> byDate = attendanceRepository
+            .findByEmployeeAndDate(employee, att.getDate());
+        entity = byDate.orElseGet(Attendance::new);
+        entity.setEmployee(employee);
+      }
+      if (entity.getId() != null &&
+          !Objects.equals(entity.getEmployee().getEmpId(), employee.getEmpId())) {
+        return ResponseEntity.badRequest()
+            .body("Attendance record for date " + att.getDate()
+                + " does not belong to " + fullName);
+      }
+      entity.setDate(att.getDate());
+      entity.setStatus(att.getStatus());
+      entity.setReason(att.getReason());
+      toSave.add(entity);
+    }
 
-      List<Attendance> saved = attendanceRepository.saveAll(toSave);
-      return ResponseEntity.ok(saved);
+    List<Attendance> saved = attendanceRepository.saveAll(toSave);
+    return ResponseEntity.ok(saved);
   }
+
+  @Autowired
+  private EmployeePasswordResetService passwordResetService;
+
+  @Autowired
+  private EmployeeEmailService employeeEmailService;
+
+  /**
+   * Send an employee their login details via email.
+   * POST /api/employee/{subadminId}/{fullName}/send-login-details
+   */
+  @PostMapping("/{subadminId}/{fullName}/send-login-details")
+  public ResponseEntity<String> sendLoginDetails(
+      @PathVariable int subadminId,
+      @PathVariable String fullName) {
+    // 1) find the employee
+    Employee emp = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+    if (emp == null) {
+      return ResponseEntity
+          .status(HttpStatus.NOT_FOUND)
+          .body("No employee named '" + fullName + "' under SubAdmin " + subadminId);
+    }
+
+    // 2) send the email
+    boolean sent = employeeEmailService.sendEmployeeCredentials(emp);
+    if (!sent) {
+      return ResponseEntity
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to send login details to " + emp.getEmail());
+    }
+
+    // 3) success
+    return ResponseEntity.ok("Login details sent to " + emp.getEmail());
+  }
+
+  /**
+   * Employee login (plain-text password).
+   * POST /api/employee/{subadminId}/{fullName}/login-employee
+   * Query parameters: email, password
+   */
+  @PostMapping("/{subadminId}/{fullName}/login-employee")
+  public ResponseEntity<String> loginEmployee(
+      @PathVariable int subadminId,
+      @PathVariable String fullName,
+      @RequestParam String email,
+      @RequestParam String password) {
+    // 1) Lookup employee under the given Subadmin by full name
+    Employee emp = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+    if (emp == null) {
+      return ResponseEntity
+          .status(HttpStatus.UNAUTHORIZED)
+          .body("Employee not found");
+    }
+
+    // 2) Verify email matches
+    if (!emp.getEmail().equalsIgnoreCase(email)) {
+      return ResponseEntity
+          .status(HttpStatus.UNAUTHORIZED)
+          .body("Invalid email or password");
+    }
+
+    // 3) Verify password matches (plain text)
+    if (!emp.getPassword().equals(password)) {
+      return ResponseEntity
+          .status(HttpStatus.UNAUTHORIZED)
+          .body("Invalid email or password");
+    }
+
+    // 4) Successful login
+    return ResponseEntity.ok("Login successful");
+  }
+
+  /**
+   * 1) Request a password reset OTP.
+   * POST /api/employee/forgot-password/request
+   * Body (application/json): { "email": "user@example.com" }
+   */
+  @PostMapping(value = "/forgot-password/request", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> requestForgotPassword(
+      @RequestBody Map<String, String> body) {
+    String email = body.get("email");
+    if (email == null || email.isBlank()) {
+      return ResponseEntity
+          .badRequest()
+          .body("Missing field: email");
+    }
+    try {
+      passwordResetService.sendResetOTP(email);
+      return ResponseEntity.ok("OTP sent to email: " + email);
+    } catch (RuntimeException ex) {
+      return ResponseEntity
+          .status(HttpStatus.BAD_REQUEST)
+          .body("Failed to send OTP: " + ex.getMessage());
+    }
+  }
+
+  /**
+   * 2) Verify the OTP and reset the password in one call.
+   * POST /api/employee/forgot-password/verify
+   * Body (application/json):
+   * { "email":"user@example.com", "otp":"ABC123", "newPassword":"secret" }
+   */
+  @PostMapping(value = "/forgot-password/verify", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> verifyOtpAndResetPassword(
+      @RequestBody Map<String, String> body) {
+    String email = body.get("email");
+    String otp = body.get("otp");
+    String newPassword = body.get("newPassword");
+
+    if (email == null || otp == null || newPassword == null) {
+      return ResponseEntity
+          .badRequest()
+          .body("Required fields: email, otp, newPassword");
+    }
+
+    if (!passwordResetService.verifyOTP(email, otp)) {
+      return ResponseEntity
+          .status(HttpStatus.BAD_REQUEST)
+          .body("Invalid or expired OTP.");
+    }
+
+    try {
+      passwordResetService.resetPassword(email, newPassword);
+      return ResponseEntity.ok("Password updated successfully.");
+    } catch (RuntimeException ex) {
+      return ResponseEntity
+          .status(HttpStatus.BAD_REQUEST)
+          .body("Error: " + ex.getMessage());
+    }
+  }
+
 }

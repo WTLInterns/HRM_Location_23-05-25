@@ -8,6 +8,7 @@ import com.jaywant.demo.Repo.EmployeeRepo;
 import com.jaywant.demo.Repo.SubAdminRepo;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,10 @@ public class EmployeeService {
     return employeeRepo.findByFullName(fullName);
   }
 
+  public Optional<Employee> findByEmail(String email) {
+    return employeeRepo.findByEmail(email);
+  }
+
   public Employee findBySubadminIdAndFullName(int subadminId, String employeeFullName) {
     return employeeRepo.findBySubadminIdAndFullName(subadminId, employeeFullName);
   }
@@ -48,6 +53,17 @@ public class EmployeeService {
     }
 
     return attendanceRepo.saveAll(attendances);
+  }
+
+  public void updatePassword(int empId, String newPassword) {
+    Optional<Employee> opt = employeeRepo.findById(empId);
+    if (!opt.isPresent()) {
+      throw new RuntimeException("Employee not found with id: " + empId);
+    }
+    Employee emp = opt.get();
+    // direct assignment, no encoding
+    emp.setPassword(newPassword);
+    employeeRepo.save(emp);
   }
 
 }
