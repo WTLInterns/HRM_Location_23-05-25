@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.springframework.http.MediaType;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -496,41 +496,37 @@ public class EmployeeController {
     return ResponseEntity.ok("Login details sent to " + emp.getEmail());
   }
 
-  /**
-   * Employee login (plain-text password).
-   * POST /api/employee/{subadminId}/{fullName}/login-employee
-   * Query parameters: email, password
-   */
   @PostMapping("/{subadminId}/{fullName}/login-employee")
-  public ResponseEntity<String> loginEmployee(
+  public ResponseEntity<?> loginEmployee(
       @PathVariable int subadminId,
       @PathVariable String fullName,
       @RequestParam String email,
       @RequestParam String password) {
-    // 1) Lookup employee under the given Subadmin by full name
+
+    // Find employee by subadminId and full name
     Employee emp = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
     if (emp == null) {
       return ResponseEntity
           .status(HttpStatus.UNAUTHORIZED)
-          .body("Employee not found");
+          .body("Employee not found with given Subadmin ID and Full Name.");
     }
 
-    // 2) Verify email matches
+    // Check if email matches
     if (!emp.getEmail().equalsIgnoreCase(email)) {
       return ResponseEntity
           .status(HttpStatus.UNAUTHORIZED)
-          .body("Invalid email or password");
+          .body("Incorrect email.");
     }
 
-    // 3) Verify password matches (plain text)
+    // Check if password matches
     if (!emp.getPassword().equals(password)) {
       return ResponseEntity
           .status(HttpStatus.UNAUTHORIZED)
-          .body("Invalid email or password");
+          .body("Incorrect password.");
     }
 
-    // 4) Successful login
-    return ResponseEntity.ok("Login successful");
+    // Return employee data including subadmin information
+    return ResponseEntity.ok(emp); // Returns the entire Employee object including Subadmin
   }
 
   /**
@@ -590,6 +586,46 @@ public class EmployeeController {
           .status(HttpStatus.BAD_REQUEST)
           .body("Error: " + ex.getMessage());
     }
+  }
+
+  @PostMapping("/{subadminId}/{fullName}/attendance/addnew")
+
+  public ResponseEntity<?> addAttendance1(@PathVariable int subadminId,
+
+      @PathVariable String fullName,
+
+      @RequestBody Attendance newAttendance) {
+
+    // Fetch employee using subadminId and fullName
+
+    Employee employee = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+
+    // If employee is not found, return error response
+
+    if (employee == null) {
+
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+
+          .body("Employee not found for name: " + fullName);
+
+    }
+
+    // Set employee in the attendance entity
+
+    newAttendance.setEmployee(employee);
+
+    // Calculate working hours and break duration before saving
+
+    newAttendance.calculateDurations();
+
+    // Save the new attendance record
+
+    Attendance savedAttendance = attendanceRepository.save(newAttendance);
+
+    // Return the saved attendance record
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedAttendance);
+
   }
 
 }

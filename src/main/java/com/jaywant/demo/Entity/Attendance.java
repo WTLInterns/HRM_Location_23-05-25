@@ -1,5 +1,8 @@
 package com.jaywant.demo.Entity;
 
+import java.time.Duration;
+import java.time.LocalTime;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
@@ -9,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 
 @Entity
 public class Attendance {
@@ -19,53 +23,26 @@ public class Attendance {
 
   private String date;
   private String status;
+
   @Column(length = 500)
   private String reason;
 
-  private String punchIn;
-  private String lunchPunchOut;
-  private String lunchPunchIn;
-  private String punchOut;
+  @Column
+  private String workingHours;
 
-  public String getPunchIn() {
-    return punchIn;
-  }
+  @Column
+  private String breakDuration;
 
-  public void setPunchIn(String punchIn) {
-    this.punchIn = punchIn;
-  }
+  @Column
+  private LocalTime punchInTime;
 
-  public String getLunchPunchOut() {
-    return lunchPunchOut;
-  }
+  @Column
+  private LocalTime punchOutTime;
 
-  public void setLunchPunchOut(String lunchPunchOut) {
-    this.lunchPunchOut = lunchPunchOut;
-  }
-
-  public String getLunchPunchIn() {
-    return lunchPunchIn;
-  }
-
-  public void setLunchPunchIn(String lunchPunchIn) {
-    this.lunchPunchIn = lunchPunchIn;
-  }
-
-  public String getPunchOut() {
-    return punchOut;
-  }
-
-  public void setPunchOut(String punchOut) {
-    this.punchOut = punchOut;
-  }
-
-  public String getReason() {
-    return reason;
-  }
-
-  public void setReason(String reason) {
-    this.reason = reason;
-  }
+  @Column
+  private LocalTime lunchInTime; // Added lunch-in time
+  @Column
+  private LocalTime lunchOutTime; // Added lunch-out time
 
   @ManyToOne
   @JoinColumn(name = "employee_id")
@@ -73,7 +50,6 @@ public class Attendance {
   private Employee employee;
 
   // ==== GETTERS AND SETTERS ====
-
   public Long getId() {
     return id;
   }
@@ -98,11 +74,86 @@ public class Attendance {
     this.status = status;
   }
 
+  public String getReason() {
+    return reason;
+  }
+
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
+
+  public LocalTime getPunchInTime() {
+    return punchInTime;
+  }
+
+  public void setPunchInTime(LocalTime punchInTime) {
+    this.punchInTime = punchInTime;
+  }
+
+  public LocalTime getPunchOutTime() {
+    return punchOutTime;
+  }
+
+  public void setPunchOutTime(LocalTime punchOutTime) {
+    this.punchOutTime = punchOutTime;
+  }
+
+  public LocalTime getLunchInTime() {
+    return lunchInTime;
+  }
+
+  public void setLunchInTime(LocalTime lunchInTime) {
+    this.lunchInTime = lunchInTime;
+  }
+
+  public LocalTime getLunchOutTime() {
+    return lunchOutTime;
+  }
+
+  public void setLunchOutTime(LocalTime lunchOutTime) {
+    this.lunchOutTime = lunchOutTime;
+  }
+
   public Employee getEmployee() {
     return employee;
   }
 
   public void setEmployee(Employee employee) {
     this.employee = employee;
+  }
+
+  public String getWorkingHours() {
+    return workingHours;
+  }
+
+  public void setWorkingHours(String workingHours) {
+    this.workingHours = workingHours;
+  }
+
+  public String getBreakDuration() {
+    return breakDuration;
+  }
+
+  public void setBreakDuration(String breakDuration) {
+    this.breakDuration = breakDuration;
+  }
+
+  public void calculateDurations() {
+    if (punchInTime != null && punchOutTime != null) {
+      Duration total = Duration.between(punchInTime, punchOutTime);
+      Duration lunch = Duration.ZERO;
+
+      if (lunchInTime != null && lunchOutTime != null) {
+        lunch = Duration.between(lunchInTime, lunchOutTime);
+        long lh = lunch.toHours();
+        long lm = lunch.toMinutesPart();
+        this.breakDuration = lh + "h " + lm + "m";
+      }
+
+      Duration actual = total.minus(lunch);
+      long h = actual.toHours();
+      long m = actual.toMinutesPart();
+      this.workingHours = h + "h " + m + "m";
+    }
   }
 }

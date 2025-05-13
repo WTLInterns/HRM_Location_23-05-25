@@ -328,7 +328,7 @@ public class SubAdminService {
       String address,
       MultipartFile stampImg,
       MultipartFile signature,
-      MultipartFile companylogo) {
+      MultipartFile companylogo, Double latitude, Double longitude) {
 
     Subadmin subAdmin = repo.findById(id)
         .orElseThrow(() -> new RuntimeException("Subadmin not found with ID: " + id));
@@ -342,6 +342,8 @@ public class SubAdminService {
     subAdmin.setCinno(cinno);
     subAdmin.setCompanyurl(companyurl);
     subAdmin.setAddress(address);
+    subAdmin.setLatitude(latitude);
+    subAdmin.setLongitude(longitude);
 
     // Update optional files when provided
     if (stampImg != null && !stampImg.isEmpty()) {

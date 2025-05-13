@@ -144,7 +144,9 @@ public class MasterAdminController {
       @RequestParam(value = "companylogo", required = false) MultipartFile companylogo,
       @RequestParam(value = "cinno", required = false) String cinno,
       @RequestParam(value = "address", required = false) String address,
-      @RequestParam(value = "companyurl", required = false) String companyurl
+      @RequestParam(value = "companyurl", required = false) String companyurl,
+      @RequestParam(value = "latitude", required = false) Double latitude,
+      @RequestParam(value = "longitude", required = false) Double longitude
 
   ) {
     try {
@@ -160,6 +162,8 @@ public class MasterAdminController {
       subadmin.setAddress(address);
       subadmin.setCinno(cinno);
       subadmin.setCompanyurl(companyurl);
+      subadmin.setLatitude(latitude);
+      subadmin.setLongitude(longitude);
       // Role will be set by default in the entity ("SUB_ADMIN")
 
       Subadmin saved = masterAdminService.createSubAdmin(subadmin, id, stampImg, signature, companylogo);

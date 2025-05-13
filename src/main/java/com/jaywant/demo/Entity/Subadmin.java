@@ -38,6 +38,26 @@ public class Subadmin {
     private String companyurl;
     private String address;
 
+    private Double latitude;
+    private Double longitude;
+
+    // getters & setters
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
     public String getCinno() {
         return cinno;
     }
@@ -202,6 +222,37 @@ public class Subadmin {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Subadmin(int id, String name, String lastname, String stampImg, String signature, String email,
+            String phoneno, String password, String registercompanyname, String companylogo, String role, String gstno,
+            String status, String cinno, String companyurl, String address, Double latitude, Double longitude,
+            MasterAdmin masterAdmin, List<Employee> employee, List<Certificate> certificates) {
+        this.id = id;
+        this.name = name;
+        this.lastname = lastname;
+        this.stampImg = stampImg;
+        this.signature = signature;
+        this.email = email;
+        this.phoneno = phoneno;
+        this.password = password;
+        this.registercompanyname = registercompanyname;
+        this.companylogo = companylogo;
+        this.role = role;
+        this.gstno = gstno;
+        this.status = status;
+        this.cinno = cinno;
+        this.companyurl = companyurl;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.masterAdmin = masterAdmin;
+        this.employee = employee;
+        this.certificates = certificates;
+    }
+
+    public Subadmin() {
+
     }
 
 }
