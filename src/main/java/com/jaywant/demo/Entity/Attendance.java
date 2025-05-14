@@ -2,17 +2,12 @@ package com.jaywant.demo.Entity;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 
 @Entity
 public class Attendance {
@@ -27,29 +22,35 @@ public class Attendance {
   @Column(length = 500)
   private String reason;
 
-  @Column
   private String workingHours;
-
-  @Column
   private String breakDuration;
 
-  @Column
+  @Column(columnDefinition = "TIME(0)")
   private LocalTime punchInTime;
 
-  @Column
+  @Column(columnDefinition = "TIME(0)")
   private LocalTime punchOutTime;
 
-  @Column
-  private LocalTime lunchInTime; // Added lunch-in time
-  @Column
-  private LocalTime lunchOutTime; // Added lunch-out time
+  @Column(columnDefinition = "TIME(0)")
+  private LocalTime lunchInTime;
+
+  @Column(columnDefinition = "TIME(0)")
+  private LocalTime lunchOutTime;
 
   @ManyToOne
   @JoinColumn(name = "employee_id")
   @JsonBackReference
   private Employee employee;
 
-  // ==== GETTERS AND SETTERS ====
+  // Automatically calculate durations before save/update
+  @PrePersist
+  @PreUpdate
+  private void preSave() {
+    this.calculateDurations();
+  }
+
+  // ==== Getters and Setters ====
+
   public Long getId() {
     return id;
   }
@@ -82,36 +83,40 @@ public class Attendance {
     this.reason = reason;
   }
 
+  @JsonFormat(pattern = "HH:mm")
   public LocalTime getPunchInTime() {
     return punchInTime;
   }
 
   public void setPunchInTime(LocalTime punchInTime) {
-    this.punchInTime = punchInTime;
+    this.punchInTime = punchInTime != null ? punchInTime.truncatedTo(ChronoUnit.MINUTES) : null;
   }
 
+  @JsonFormat(pattern = "HH:mm")
   public LocalTime getPunchOutTime() {
     return punchOutTime;
   }
 
   public void setPunchOutTime(LocalTime punchOutTime) {
-    this.punchOutTime = punchOutTime;
+    this.punchOutTime = punchOutTime != null ? punchOutTime.truncatedTo(ChronoUnit.MINUTES) : null;
   }
 
+  @JsonFormat(pattern = "HH:mm")
   public LocalTime getLunchInTime() {
     return lunchInTime;
   }
 
   public void setLunchInTime(LocalTime lunchInTime) {
-    this.lunchInTime = lunchInTime;
+    this.lunchInTime = lunchInTime != null ? lunchInTime.truncatedTo(ChronoUnit.MINUTES) : null;
   }
 
+  @JsonFormat(pattern = "HH:mm")
   public LocalTime getLunchOutTime() {
     return lunchOutTime;
   }
 
   public void setLunchOutTime(LocalTime lunchOutTime) {
-    this.lunchOutTime = lunchOutTime;
+    this.lunchOutTime = lunchOutTime != null ? lunchOutTime.truncatedTo(ChronoUnit.MINUTES) : null;
   }
 
   public Employee getEmployee() {
@@ -138,22 +143,38 @@ public class Attendance {
     this.breakDuration = breakDuration;
   }
 
+  // ==== Calculate Working and Break Durations ====
+
   public void calculateDurations() {
     if (punchInTime != null && punchOutTime != null) {
-      Duration total = Duration.between(punchInTime, punchOutTime);
-      Duration lunch = Duration.ZERO;
+      LocalTime in = punchInTime.truncatedTo(ChronoUnit.MINUTES);
+      LocalTime out = punchOutTime.truncatedTo(ChronoUnit.MINUTES);
 
+      Duration total = Duration.between(in, out);
+      if (total.isNegative())
+        total = Duration.ZERO;
+
+      Duration lunch = Duration.ZERO;
       if (lunchInTime != null && lunchOutTime != null) {
-        lunch = Duration.between(lunchInTime, lunchOutTime);
-        long lh = lunch.toHours();
-        long lm = lunch.toMinutesPart();
-        this.breakDuration = lh + "h " + lm + "m";
+        LocalTime lin = lunchInTime.truncatedTo(ChronoUnit.MINUTES);
+        LocalTime lout = lunchOutTime.truncatedTo(ChronoUnit.MINUTES);
+        lunch = Duration.between(lin, lout);
+        if (lunch.isNegative())
+          lunch = Duration.ZERO;
+
+        this.breakDuration = lunch.toHours() + "h " + lunch.toMinutesPart() + "m";
+      } else {
+        this.breakDuration = "0h 0m";
       }
 
       Duration actual = total.minus(lunch);
-      long h = actual.toHours();
-      long m = actual.toMinutesPart();
-      this.workingHours = h + "h " + m + "m";
+      if (actual.isNegative())
+        actual = Duration.ZERO;
+
+      this.workingHours = actual.toHours() + "h " + actual.toMinutesPart() + "m";
+    } else {
+      this.workingHours = "0h 0m";
+      this.breakDuration = "0h 0m";
     }
   }
 }

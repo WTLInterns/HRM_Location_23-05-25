@@ -94,6 +94,48 @@ public class Employee {
   @JsonManagedReference("emp-cert")
   private List<Certificate> certificates = new ArrayList<>();
 
+
+  
+
+  public Employee(int empId, String firstName, String lastName, String email, Long phone, String aadharNo,
+      String panCard, String education, String bloodGroup, String jobRole, String gender, String address,
+      String birthDate, String joiningDate, String status, String bankName, String bankAccountNo, String bankIfscCode,
+      String branchName, Long salary, String empimg, String department, String password, String adharimg, String panimg,
+      String role, Subadmin subadmin, List<Attendance> attendance, List<Certificate> certificates) {
+    this.empId = empId;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.phone = phone;
+    this.aadharNo = aadharNo;
+    this.panCard = panCard;
+    this.education = education;
+    this.bloodGroup = bloodGroup;
+    this.jobRole = jobRole;
+    this.gender = gender;
+    this.address = address;
+    this.birthDate = birthDate;
+    this.joiningDate = joiningDate;
+    this.status = status;
+    this.bankName = bankName;
+    this.bankAccountNo = bankAccountNo;
+    this.bankIfscCode = bankIfscCode;
+    this.branchName = branchName;
+    this.salary = salary;
+    this.empimg = empimg;
+    this.department = department;
+    this.password = password;
+    this.adharimg = adharimg;
+    this.panimg = panimg;
+    this.role = role;
+    this.subadmin = subadmin;
+    this.attendance = attendance;
+    this.certificates = certificates;
+  }
+
+  public Employee() {
+    
+  }
   public List<Certificate> getCertificates() {
     return certificates;
   }

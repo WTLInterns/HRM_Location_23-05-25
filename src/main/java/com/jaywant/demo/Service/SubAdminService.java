@@ -255,6 +255,7 @@ public class SubAdminService {
       String bankIfscCode,
       String branchName,
       Long salary,
+      String password,
       MultipartFile empimg,
       MultipartFile adharimg,
       MultipartFile panimg,
@@ -290,7 +291,7 @@ public class SubAdminService {
     // always preserve role
     e.setRole("EMPLOYEE");
 
-    e.setPassword(phone.toString());
+    e.setPassword(password);
 
     // update images if provided
     if (empimg != null && !empimg.isEmpty()) {

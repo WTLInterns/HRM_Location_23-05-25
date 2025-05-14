@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -177,6 +179,7 @@ public class EmployeeController {
       @RequestParam String branchName,
       @RequestParam Long salary,
       @RequestParam String department,
+      @RequestParam String password,
 
       // image parts
       @RequestPart(required = false) MultipartFile empimg,
@@ -191,7 +194,8 @@ public class EmployeeController {
 
     try {
       // 2) delegate to your service using the empId you just found
-      Employee updated = subAdminService.updateEmployee(
+      Employee updated;
+      updated = subAdminService.updateEmployee(
           subadminId,
           existing.getEmpId(), // <-- use the real ID
           firstName, lastName, email, phone,
@@ -199,7 +203,7 @@ public class EmployeeController {
           jobRole, gender, address,
           birthDate, joiningDate, status,
           bankName, bankAccountNo, bankIfscCode,
-          branchName, salary,
+          branchName, salary, password,
           empimg, adharimg, panimg, department);
       return ResponseEntity.ok(updated);
 
@@ -354,7 +358,140 @@ public class EmployeeController {
 
   }
 
-  private static final List<String> REQUIRES_REASON = Arrays.asList("absent", "paidleave");
+  // // At top of class:
+  // private static final List<String> REQUIRES_REASON = List.of("absent",
+  // "paidleave");
+
+  // private boolean requiresReason(String status) {
+  // if (status == null) return false;
+  // String normalized = status.trim().toLowerCase().replaceAll("[ _]", "");
+  // return REQUIRES_REASON.contains(normalized);
+  // }
+
+  // /**
+  // * Bulk-add or single-add attendance endpoint.
+  // * URL: POST /api/employee/{subadminId}/{fullName}/attendance/add/bulk
+  // */
+  // @PostMapping("/{subadminId}/{fullName}/attendance/add/bulk")
+  // public ResponseEntity<?> addOrUpdateAttendances(
+  // @PathVariable int subadminId,
+  // @PathVariable String fullName,
+  // @RequestBody JsonNode payload) {
+
+  // try {
+  // ObjectMapper mapper = new ObjectMapper()
+  // .registerModule(new JavaTimeModule())
+  // .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+  // List<Attendance> attendances;
+  // if (payload.isArray()) {
+  // attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
+  // } else {
+  // Attendance single = mapper.treeToValue(payload, Attendance.class);
+  // attendances = Collections.singletonList(single);
+  // }
+  // return processBatch(attendances, subadminId, fullName);
+
+  // } catch (JsonProcessingException e) {
+  // return ResponseEntity
+  // .badRequest()
+  // .body("Invalid Attendance JSON payload: " + e.getOriginalMessage());
+  // }
+  // }
+
+  // /**
+  // * Bulk-update or single-update attendance endpoint.
+  // * URL: PUT /api/employee/{subadminId}/{fullName}/attendance/update/bulk
+  // */
+  // @PutMapping("/{subadminId}/{fullName}/attendance/update/bulk")
+  // public ResponseEntity<?> updateOrAddAttendances(
+  // @PathVariable int subadminId,
+  // @PathVariable String fullName,
+  // @RequestBody JsonNode payload) {
+  // // exactly the same body as addOrUpdate; reuse it:
+  // return addOrUpdateAttendances(subadminId, fullName, payload);
+  // }
+
+  // /**
+  // * Shared logic: for each Attendance, if ID present or record exists for date,
+  // * update; otherwise add new.
+  // */
+  // private ResponseEntity<?> processBatch(
+  // List<Attendance> attendances,
+  // int subadminId,
+  // String fullName) {
+
+  // Employee employee =
+  // employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+  // if (employee == null) {
+  // return ResponseEntity.badRequest()
+  // .body("Employee not found: " + fullName);
+  // }
+
+  // List<Attendance> toPersist = new ArrayList<>();
+  // for (Attendance incoming : attendances) {
+  // // 1) If status requires reason, enforce it
+  // if (requiresReason(incoming.getStatus())
+  // && (incoming.getReason() == null || incoming.getReason().isBlank())) {
+  // return ResponseEntity.badRequest()
+  // .body("Reason required when status='" +
+  // incoming.getStatus() +
+  // "' for date " + incoming.getDate());
+  // }
+
+  // // 2) Find existing by ID or by date
+  // Attendance entity;
+  // if (incoming.getId() != null) {
+  // entity = attendanceRepository.findById(incoming.getId())
+  // .orElseThrow(() ->
+  // new RuntimeException("Attendance not found: ID " + incoming.getId()));
+  // } else {
+  // entity = attendanceRepository
+  // .findByEmployeeAndDate(employee, incoming.getDate())
+  // .orElseGet(() -> {
+  // Attendance a = new Attendance();
+  // a.setEmployee(employee);
+  // return a;
+  // });
+  // }
+
+  // // 3) Guard against cross-employee tampering
+  // if (entity.getId() != null
+  // && !Objects.equals(entity.getEmployee().getEmpId(),
+  // employee.getEmpId())) {
+  // return ResponseEntity.badRequest()
+  // .body("Attendance for date " + incoming.getDate()
+  // + " does not belong to " + fullName);
+  // }
+
+  // // 4) Copy over fields: only overwrite status/reason if provided
+  // entity.setDate(incoming.getDate());
+  // if (incoming.getStatus() != null) {
+  // entity.setStatus(incoming.getStatus());
+  // }
+  // if (incoming.getReason() != null) {
+  // entity.setReason(incoming.getReason());
+  // }
+
+  // // 5) Always update times
+  // entity.setPunchInTime(incoming.getPunchInTime());
+  // entity.setLunchInTime(incoming.getLunchInTime());
+  // entity.setLunchOutTime(incoming.getLunchOutTime());
+  // entity.setPunchOutTime(incoming.getPunchOutTime());
+
+  // // 6) Recalculate derived fields
+  // entity.calculateDurations();
+
+  // toPersist.add(entity);
+  // }
+
+  // // 7) Save & return the full list
+  // List<Attendance> saved = attendanceRepository.saveAll(toPersist);
+  // return ResponseEntity.ok(saved);
+  // }
+
+  // at top of class:
+  private static final List<String> REQUIRES_REASON = List.of("absent", "paidleave");
 
   private boolean requiresReason(String status) {
     if (status == null)
@@ -366,51 +503,45 @@ public class EmployeeController {
   /**
    * Bulk-add or single-add attendance endpoint.
    * URL: POST /api/employee/{subadminId}/{fullName}/attendance/add/bulk
-   * Accepts either a JSON array or a single object.
    */
   @PostMapping("/{subadminId}/{fullName}/attendance/add/bulk")
   public ResponseEntity<?> addOrUpdateAttendances(
       @PathVariable int subadminId,
       @PathVariable String fullName,
       @RequestBody JsonNode payload) {
+
     try {
+      ObjectMapper mapper = new ObjectMapper()
+          .registerModule(new JavaTimeModule())
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
       List<Attendance> attendances;
-      ObjectMapper mapper = new ObjectMapper();
       if (payload.isArray()) {
         attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
       } else {
-        Attendance att = mapper.treeToValue(payload, Attendance.class);
-        attendances = Collections.singletonList(att);
+        Attendance single = mapper.treeToValue(payload, Attendance.class);
+        attendances = Collections.singletonList(single);
       }
       return processBatch(attendances, subadminId, fullName);
+
     } catch (JsonProcessingException e) {
-      return ResponseEntity.badRequest().body("Invalid Attendance JSON payload");
+      return ResponseEntity
+          .badRequest()
+          .body("Invalid Attendance JSON payload: " + e.getOriginalMessage());
     }
   }
 
   /**
    * Bulk-update or single-update attendance endpoint.
    * URL: PUT /api/employee/{subadminId}/{fullName}/attendance/update/bulk
-   * Accepts either a JSON array or a single object.
    */
   @PutMapping("/{subadminId}/{fullName}/attendance/update/bulk")
   public ResponseEntity<?> updateOrAddAttendances(
       @PathVariable int subadminId,
       @PathVariable String fullName,
       @RequestBody JsonNode payload) {
-    try {
-      List<Attendance> attendances;
-      ObjectMapper mapper = new ObjectMapper();
-      if (payload.isArray()) {
-        attendances = Arrays.asList(mapper.treeToValue(payload, Attendance[].class));
-      } else {
-        Attendance att = mapper.treeToValue(payload, Attendance.class);
-        attendances = Collections.singletonList(att);
-      }
-      return processBatch(attendances, subadminId, fullName);
-    } catch (JsonProcessingException e) {
-      return ResponseEntity.badRequest().body("Invalid Attendance JSON payload");
-    }
+    // reuse the same logic as POST
+    return addOrUpdateAttendances(subadminId, fullName, payload);
   }
 
   /**
@@ -421,44 +552,76 @@ public class EmployeeController {
       List<Attendance> attendances,
       int subadminId,
       String fullName) {
+
     Employee employee = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
     if (employee == null) {
       return ResponseEntity.badRequest().body("Employee not found: " + fullName);
     }
 
-    List<Attendance> toSave = new ArrayList<>();
-    for (Attendance att : attendances) {
-      if (requiresReason(att.getStatus()) && (att.getReason() == null || att.getReason().isBlank())) {
+    List<Attendance> toPersist = new ArrayList<>();
+    for (Attendance incoming : attendances) {
+      // enforce reason when needed
+      if (requiresReason(incoming.getStatus())
+          && (incoming.getReason() == null || incoming.getReason().isBlank())) {
         return ResponseEntity.badRequest()
-            .body("Reason is required when status='" + att.getStatus()
-                + "' for date " + att.getDate());
+            .body("Reason required when status='" +
+                incoming.getStatus() +
+                "' for date " + incoming.getDate());
       }
+
+      // find existing or new
       Attendance entity;
-      if (att.getId() != null) {
-        Optional<Attendance> opt = attendanceRepository.findById(att.getId());
-        if (opt.isEmpty()) {
-          return ResponseEntity.badRequest().body("Attendance not found: ID " + att.getId());
-        }
-        entity = opt.get();
+      if (incoming.getId() != null) {
+        entity = attendanceRepository.findById(incoming.getId())
+            .orElseThrow(() -> new RuntimeException("Attendance not found: ID " + incoming.getId()));
       } else {
-        Optional<Attendance> byDate = attendanceRepository
-            .findByEmployeeAndDate(employee, att.getDate());
-        entity = byDate.orElseGet(Attendance::new);
-        entity.setEmployee(employee);
+        entity = attendanceRepository
+            .findByEmployeeAndDate(employee, incoming.getDate())
+            .orElseGet(() -> {
+              Attendance a = new Attendance();
+              a.setEmployee(employee);
+              return a;
+            });
       }
-      if (entity.getId() != null &&
-          !Objects.equals(entity.getEmployee().getEmpId(), employee.getEmpId())) {
+
+      // guard cross‑employee
+      if (entity.getId() != null
+          && !Objects.equals(entity.getEmployee().getEmpId(), employee.getEmpId())) {
         return ResponseEntity.badRequest()
-            .body("Attendance record for date " + att.getDate()
+            .body("Attendance for date " + incoming.getDate()
                 + " does not belong to " + fullName);
       }
-      entity.setDate(att.getDate());
-      entity.setStatus(att.getStatus());
-      entity.setReason(att.getReason());
-      toSave.add(entity);
+
+      // copy fields (only overwrite status/reason if provided)
+      entity.setDate(incoming.getDate());
+      if (incoming.getStatus() != null) {
+        entity.setStatus(incoming.getStatus());
+      }
+      if (incoming.getReason() != null) {
+        entity.setReason(incoming.getReason());
+      }
+
+      // only overwrite times if they came in the payload
+      if (incoming.getPunchInTime() != null) {
+        entity.setPunchInTime(incoming.getPunchInTime());
+      }
+      if (incoming.getLunchInTime() != null) {
+        entity.setLunchInTime(incoming.getLunchInTime());
+      }
+      if (incoming.getLunchOutTime() != null) {
+        entity.setLunchOutTime(incoming.getLunchOutTime());
+      }
+      if (incoming.getPunchOutTime() != null) {
+        entity.setPunchOutTime(incoming.getPunchOutTime());
+      }
+
+      // recalc derived fields
+      entity.calculateDurations();
+
+      toPersist.add(entity);
     }
 
-    List<Attendance> saved = attendanceRepository.saveAll(toSave);
+    List<Attendance> saved = attendanceRepository.saveAll(toPersist);
     return ResponseEntity.ok(saved);
   }
 
@@ -496,37 +659,33 @@ public class EmployeeController {
     return ResponseEntity.ok("Login details sent to " + emp.getEmail());
   }
 
-  @PostMapping("/{subadminId}/{fullName}/login-employee")
+  /**
+   * POST /api/employee/login-employee?email=...&password=...
+   * Returns the full Employee object (with nested Subadmin) on success.
+   */
+  @PostMapping("/login-employee")
   public ResponseEntity<?> loginEmployee(
-      @PathVariable int subadminId,
-      @PathVariable String fullName,
       @RequestParam String email,
       @RequestParam String password) {
 
-    // Find employee by subadminId and full name
-    Employee emp = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
-    if (emp == null) {
+    // 1) Find by email
+    Optional<Employee> optEmp = empService.findByEmail(email);
+    if (optEmp.isEmpty()) {
       return ResponseEntity
           .status(HttpStatus.UNAUTHORIZED)
-          .body("Employee not found with given Subadmin ID and Full Name.");
+          .body("Employee not found with email: " + email);
     }
+    Employee emp = optEmp.get();
 
-    // Check if email matches
-    if (!emp.getEmail().equalsIgnoreCase(email)) {
-      return ResponseEntity
-          .status(HttpStatus.UNAUTHORIZED)
-          .body("Incorrect email.");
-    }
-
-    // Check if password matches
+    // 2) Check password
     if (!emp.getPassword().equals(password)) {
       return ResponseEntity
           .status(HttpStatus.UNAUTHORIZED)
           .body("Incorrect password.");
     }
 
-    // Return employee data including subadmin information
-    return ResponseEntity.ok(emp); // Returns the entire Employee object including Subadmin
+    // 3) Success! Return the full Employee (includes Subadmin)
+    return ResponseEntity.ok(emp);
   }
 
   /**
@@ -588,44 +747,67 @@ public class EmployeeController {
     }
   }
 
+  private ObjectMapper jsonMapper() {
+    return new ObjectMapper()
+        .registerModule(new JavaTimeModule())
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  }
+
+  /**
+   * Single‑record add or update endpoint.
+   */
   @PostMapping("/{subadminId}/{fullName}/attendance/addnew")
-
-  public ResponseEntity<?> addAttendance1(@PathVariable int subadminId,
-
+  public ResponseEntity<?> addOrUpdateAttendance(
+      @PathVariable int subadminId,
       @PathVariable String fullName,
+      @RequestBody JsonNode payload) {
 
-      @RequestBody Attendance newAttendance) {
-
-    // Fetch employee using subadminId and fullName
-
-    Employee employee = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
-
-    // If employee is not found, return error response
-
+    Employee employee = employeeRepository
+        .findBySubadminIdAndFullName(subadminId, fullName);
     if (employee == null) {
-
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-
-          .body("Employee not found for name: " + fullName);
-
+      return ResponseEntity.badRequest()
+          .body("Employee not found: " + fullName);
     }
 
-    // Set employee in the attendance entity
+    // 1) Map JSON → Attendance
+    Attendance att;
+    try {
+      att = jsonMapper().treeToValue(payload, Attendance.class);
+    } catch (JsonProcessingException e) {
+      return ResponseEntity.badRequest()
+          .body("Invalid Attendance JSON");
+    }
 
-    newAttendance.setEmployee(employee);
+    // 2) Lookup existing or prepare new
+    Optional<Attendance> existing = attendanceRepository.findByEmployeeAndDate(employee, att.getDate());
+    Attendance entity = existing.orElseGet(() -> {
+      Attendance a = new Attendance();
+      a.setEmployee(employee);
+      return a;
+    });
 
-    // Calculate working hours and break duration before saving
+    // 3) Copy only non-null status/reason
+    if (att.getStatus() != null) {
+      entity.setStatus(att.getStatus());
+    }
+    if (att.getReason() != null) {
+      entity.setReason(att.getReason());
+    }
 
-    newAttendance.calculateDurations();
+    // 4) Always update the times
+    entity.setPunchInTime(att.getPunchInTime());
+    entity.setLunchInTime(att.getLunchInTime());
+    entity.setLunchOutTime(att.getLunchOutTime());
+    entity.setPunchOutTime(att.getPunchOutTime());
 
-    // Save the new attendance record
+    // 5) Recalculate durations
+    entity.calculateDurations();
 
-    Attendance savedAttendance = attendanceRepository.save(newAttendance);
-
-    // Return the saved attendance record
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(savedAttendance);
-
+    // 6) Save
+    Attendance saved = attendanceRepository.save(entity);
+    return ResponseEntity
+        .status(existing.isPresent() ? HttpStatus.OK : HttpStatus.CREATED)
+        .body(saved);
   }
 
 }
