@@ -658,6 +658,54 @@ public class EmployeeController {
     // 3) success
     return ResponseEntity.ok("Login details sent to " + emp.getEmail());
   }
+ 
+
+
+
+
+
+
+ /**
+   * GET: all attendance records for an employee
+   * URL: GET /api/employee/{subadminId}/{fullName}/attendance/all
+   */
+  @GetMapping("/{subadminId}/{fullName}/attendance/all")
+  public ResponseEntity<?> getAllAttendance(
+      @PathVariable int subadminId,
+      @PathVariable String fullName) {
+
+    Employee emp = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+    if (emp == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body("Employee not found: " + fullName);
+    }
+    List<Attendance> list = attendanceRepository.findByEmployee(emp);
+    return ResponseEntity.ok(list);
+  }
+
+  /**
+   * GET: single attendance record for a specific date
+   * URL: GET /api/employee/{subadminId}/{fullName}/attendance/{date}
+   */
+  @GetMapping("/{subadminId}/{fullName}/attendance/{date}")
+  public ResponseEntity<?> getAttendanceByDate(
+      @PathVariable int subadminId,
+      @PathVariable String fullName,
+      @PathVariable String date) {
+
+    Employee emp = employeeRepository.findBySubadminIdAndFullName(subadminId, fullName);
+    if (emp == null) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body("Employee not found: " + fullName);
+    }
+    Optional<Attendance> attOpt = attendanceRepository.findByEmployeeAndDate(emp, date);
+    return attOpt
+        .<ResponseEntity<?>>map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body("No attendance record for date: " + date));
+  }
+
 
   /**
    * POST /api/employee/login-employee?email=...&password=...
