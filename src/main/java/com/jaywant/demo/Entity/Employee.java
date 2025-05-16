@@ -7,15 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 @Entity
 public class Employee {
@@ -26,6 +18,10 @@ public class Employee {
 
   private String firstName;
   private String lastName;
+
+  @Column(name = "full_name")
+  private String fullName;
+
   private String email;
   private Long phone;
   private String aadharNo;
@@ -44,45 +40,14 @@ public class Employee {
   private String branchName;
   private Long salary;
   private String empimg;
-  private String department; 
+  private String department;
   private String password;
-
-  
-
-  
-
-  public String getEmpimg() {
-    return empimg;
-  }
-
-  public void setEmpimg(String empimg) {
-    this.empimg = empimg;
-  }
-
-  public String getAdharimg() {
-    return adharimg;
-  }
-
-  public void setAdharimg(String adharimg) {
-    this.adharimg = adharimg;
-  }
-
-  public String getPanimg() {
-    return panimg;
-  }
-
-  public void setPanimg(String panimg) {
-    this.panimg = panimg;
-  }
-
   private String adharimg;
   private String panimg;
-
   private String role = "EMPLOYEE";
 
   @ManyToOne
   @JoinColumn(name = "subadmin_id")
-  // @JsonBackReference
   @JsonIgnoreProperties({ "employees" })
   private Subadmin subadmin;
 
@@ -94,14 +59,20 @@ public class Employee {
   @JsonManagedReference("emp-cert")
   private List<Certificate> certificates = new ArrayList<>();
 
+  @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @JsonIgnoreProperties("leaves")
+  private List<LeaveForm> leaves;
 
-  
+  public Employee() {
+  }
 
   public Employee(int empId, String firstName, String lastName, String email, Long phone, String aadharNo,
       String panCard, String education, String bloodGroup, String jobRole, String gender, String address,
-      String birthDate, String joiningDate, String status, String bankName, String bankAccountNo, String bankIfscCode,
-      String branchName, Long salary, String empimg, String department, String password, String adharimg, String panimg,
-      String role, Subadmin subadmin, List<Attendance> attendance, List<Certificate> certificates) {
+      String birthDate, String joiningDate, String status, String bankName, String bankAccountNo,
+      String bankIfscCode, String branchName, Long salary, String empimg, String department,
+      String password, String adharimg, String panimg, String role, Subadmin subadmin,
+      List<Attendance> attendance, List<Certificate> certificates) {
+
     this.empId = empId;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -133,15 +104,10 @@ public class Employee {
     this.certificates = certificates;
   }
 
-  public Employee() {
-    
-  }
-  public List<Certificate> getCertificates() {
-    return certificates;
-  }
-
-  public void setCertificates(List<Certificate> certificates) {
-    this.certificates = certificates;
+  @PrePersist
+  @PreUpdate
+  public void updateFullName() {
+    this.fullName = (this.firstName + " " + this.lastName).trim();
   }
 
   public int getEmpId() {
@@ -158,6 +124,7 @@ public class Employee {
 
   public void setFirstName(String firstName) {
     this.firstName = firstName;
+    updateFullName();
   }
 
   public String getLastName() {
@@ -166,6 +133,15 @@ public class Employee {
 
   public void setLastName(String lastName) {
     this.lastName = lastName;
+    updateFullName();
+  }
+
+  public String getFullName() {
+    return fullName;
+  }
+
+  public void setFullName(String fullName) {
+    this.fullName = fullName; // optional override
   }
 
   public String getEmail() {
@@ -304,13 +280,29 @@ public class Employee {
     this.salary = salary;
   }
 
-  // public String getPassword() {
-  // return password;
-  // }
+  public String getEmpimg() {
+    return empimg;
+  }
 
-  // public void setPassword(String password) {
-  // this.password = password;
-  // }
+  public void setEmpimg(String empimg) {
+    this.empimg = empimg;
+  }
+
+  public String getAdharimg() {
+    return adharimg;
+  }
+
+  public void setAdharimg(String adharimg) {
+    this.adharimg = adharimg;
+  }
+
+  public String getPanimg() {
+    return panimg;
+  }
+
+  public void setPanimg(String panimg) {
+    this.panimg = panimg;
+  }
 
   public String getRole() {
     return role;
@@ -336,29 +328,35 @@ public class Employee {
     this.attendance = attendance;
   }
 
+  public List<Certificate> getCertificates() {
+    return certificates;
+  }
 
+  public void setCertificates(List<Certificate> certificates) {
+    this.certificates = certificates;
+  }
 
+  public List<LeaveForm> getLeaves() {
+    return leaves;
+  }
 
-    /**
-     * @return String return the department
-     */
-    public String getDepartment() {
-        return department;
-    }
+  public void setLeaves(List<LeaveForm> leaves) {
+    this.leaves = leaves;
+  }
 
-    /**
-     * @param department the department to set
-     */
-    public void setDepartment(String department) {
-        this.department = department;
-    }
+  public String getDepartment() {
+    return department;
+  }
 
-    public String getPassword() {
-      return password;
-    }
+  public void setDepartment(String department) {
+    this.department = department;
+  }
 
-    public void setPassword(String password) {
-      this.password = password;
-    }
+  public String getPassword() {
+    return password;
+  }
 
+  public void setPassword(String password) {
+    this.password = password;
+  }
 }
