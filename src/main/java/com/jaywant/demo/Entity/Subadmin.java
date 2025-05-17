@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -82,15 +83,15 @@ public class Subadmin {
     private MasterAdmin masterAdmin;
 
     @OneToMany(mappedBy = "subadmin", cascade = CascadeType.ALL)
-    @JsonBackReference("sub–emp")
+    @JsonIgnore // prevents recursion
     private List<Employee> employee;
 
     @OneToMany(mappedBy = "subadmin", cascade = CascadeType.ALL)
-    @JsonManagedReference("subadmin-certificate")
-    private List<Certificate> certificates = new ArrayList<>();
+    @JsonIgnore // prevents recursion
+    private List<Certificate> certificates;
 
     @OneToMany(mappedBy = "subadmin", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("leaves")
+    @JsonIgnore // prevents recursion
     private List<LeaveForm> leaves;
 
     // Add getter and setter

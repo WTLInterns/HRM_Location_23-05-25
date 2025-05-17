@@ -48,7 +48,7 @@ public class Employee {
 
   @ManyToOne
   @JoinColumn(name = "subadmin_id")
-  @JsonIgnoreProperties({ "employees" })
+  @JsonIgnoreProperties({ "employee", "leaves", "certificates", "masterAdmin" })
   private Subadmin subadmin;
 
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
@@ -60,7 +60,7 @@ public class Employee {
   private List<Certificate> certificates = new ArrayList<>();
 
   @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JsonIgnoreProperties("leaves")
+  @JsonIgnore // prevents recursion
   private List<LeaveForm> leaves;
 
   public Employee() {
