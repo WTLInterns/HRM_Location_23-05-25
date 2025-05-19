@@ -67,14 +67,16 @@ public class ExpensesController {
 
   /** Delete one. */
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(
+  public ResponseEntity<String> delete(
       @PathVariable Integer subadminId,
       @PathVariable Integer id) {
     try {
       service.delete(subadminId, id);
-      return ResponseEntity.noContent().build();
+      return ResponseEntity
+          .ok("Expense record deleted successfully");
     } catch (RuntimeException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
+
 }
