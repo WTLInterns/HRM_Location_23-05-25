@@ -743,8 +743,8 @@ public class SubAdminController {
       @RequestParam String companyurl,
       @RequestParam String address,
       @RequestParam String cinno,
-      @RequestParam Double latitude,
-      @RequestParam Double longitude,
+      @RequestParam(required = false) Double latitude,
+      @RequestParam(required = false) Double longitude,
       @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
       @RequestParam(value = "signature", required = false) MultipartFile signature,
       @RequestParam(value = "companylogo", required = false) MultipartFile companylogo) {

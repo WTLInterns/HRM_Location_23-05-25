@@ -15,4 +15,6 @@ public interface LeaveFormRepository extends JpaRepository<LeaveForm, Integer> {
    * (case‑insensitive).
    */
   List<LeaveForm> findBySubadmin_IdAndEmployee_FullNameIgnoreCase(int subadminId, String fullName);
+
+  List<LeaveForm> findBySubadmin_Id(int subadminId);
 }

@@ -77,4 +77,10 @@ public class LeaveFormServiceImpl implements LeaveFormService {
     LeaveForm existing = getLeaveFormById(subadminId, employeeFullName, leaveId);
     leaveRepo.delete(existing);
   }
+
+  @Override
+  public List<LeaveForm> getAllLeavesBySubadmin(int subadminId) {
+    // fetch only leaves belonging to the given subadmin
+    return leaveRepo.findBySubadmin_Id(subadminId);
+  }
 }

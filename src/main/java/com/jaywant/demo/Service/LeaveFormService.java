@@ -14,4 +14,7 @@ public interface LeaveFormService {
   LeaveForm updateLeaveForm(int subadminId, String employeeFullName, int leaveId, LeaveForm leaveForm);
 
   void deleteLeaveForm(int subadminId, String employeeFullName, int leaveId);
+
+  List<LeaveForm> getAllLeavesBySubadmin(int subadminId);
+
 }

@@ -24,7 +24,7 @@ public class LeaveFormController {
             @RequestBody LeaveForm leaveForm) {
 
         LeaveForm created = leaveFormService
-            .createLeaveForm(subadminId, employeeFullName, leaveForm);
+                .createLeaveForm(subadminId, employeeFullName, leaveForm);
         return ResponseEntity.ok(created);
     }
 
@@ -35,7 +35,7 @@ public class LeaveFormController {
             @PathVariable String employeeFullName) {
 
         List<LeaveForm> leaves = leaveFormService
-            .getBySubadminAndEmployeeName(subadminId, employeeFullName);
+                .getBySubadminAndEmployeeName(subadminId, employeeFullName);
         return ResponseEntity.ok(leaves);
     }
 
@@ -47,7 +47,7 @@ public class LeaveFormController {
             @PathVariable int leaveId) {
 
         LeaveForm leave = leaveFormService
-            .getLeaveFormById(subadminId, employeeFullName, leaveId);
+                .getLeaveFormById(subadminId, employeeFullName, leaveId);
         return ResponseEntity.ok(leave);
     }
 
@@ -60,7 +60,7 @@ public class LeaveFormController {
             @RequestBody LeaveForm leaveForm) {
 
         LeaveForm updated = leaveFormService
-            .updateLeaveForm(subadminId, employeeFullName, leaveId, leaveForm);
+                .updateLeaveForm(subadminId, employeeFullName, leaveId, leaveForm);
         return ResponseEntity.ok(updated);
     }
 
@@ -73,5 +73,13 @@ public class LeaveFormController {
 
         leaveFormService.deleteLeaveForm(subadminId, employeeFullName, leaveId);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Retrieve all leave forms for all employees under a specific subadmin */
+    @GetMapping("/{subadminId}/all")
+    public ResponseEntity<List<LeaveForm>> getLeavesBySubadmin(
+            @PathVariable int subadminId) {
+        List<LeaveForm> all = leaveFormService.getAllLeavesBySubadmin(subadminId);
+        return ResponseEntity.ok(all);
     }
 }
