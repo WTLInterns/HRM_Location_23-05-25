@@ -66,7 +66,7 @@ public class ExpensesController {
   }
 
   /** Delete one. */
-  @DeleteMapping("/{id}")
+  @DeleteMapping("delete-expenses/{id}")
   public ResponseEntity<String> delete(
       @PathVariable Integer subadminId,
       @PathVariable Integer id) {
