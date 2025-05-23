@@ -800,6 +800,95 @@ public class EmployeeController {
         .registerModule(new JavaTimeModule())
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
+  
+  // ==========================================================
+  // Location Tracking Endpoints
+  // ==========================================================
+  
+  /**
+   * Get location of a specific employee by subadmin ID and employee ID
+   */
+  @GetMapping("/{subadminId}/employee/{empId}/location")
+  public ResponseEntity<?> getEmployeeLocation(
+      @PathVariable int subadminId,
+      @PathVariable int empId) {
+      
+    try {
+      // Verify the employee belongs to this subadmin
+      Employee employee = employeeRepository.findById(empId).orElse(null);
+      if (employee == null) {
+        return ResponseEntity.badRequest().body("Employee not found with ID: " + empId);
+      }
+      
+      if (employee.getSubadmin() == null || employee.getSubadmin().getId() != subadminId) {
+        return ResponseEntity.badRequest().body("Employee does not belong to this subadmin");
+      }
+      
+      Map<String, Object> locationData = empService.getEmployeeLocation(empId);
+      return ResponseEntity.ok(locationData);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+    }
+  }
+  
+  /**
+   * Get locations of all employees for a subadmin
+   */
+  @GetMapping("/{subadminId}/employee/locations")
+  public ResponseEntity<?> getAllEmployeeLocations(@PathVariable int subadminId) {
+    try {
+      List<Map<String, Object>> locations = empService.getAllEmployeeLocations(subadminId);
+      return ResponseEntity.ok(locations);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+    }
+  }
+  
+  /**
+   * Update an employee's location
+   */
+  @PutMapping("/{subadminId}/employee/{empId}/location")
+  public ResponseEntity<?> updateEmployeeLocation(
+      @PathVariable int subadminId,
+      @PathVariable int empId,
+      @RequestBody Map<String, String> locationData) {
+      
+    try {
+      // Verify the employee belongs to this subadmin
+      Employee employee = employeeRepository.findById(empId).orElse(null);
+      if (employee == null) {
+        return ResponseEntity.badRequest().body("Employee not found with ID: " + empId);
+      }
+      
+      if (employee.getSubadmin() == null || employee.getSubadmin().getId() != subadminId) {
+        return ResponseEntity.badRequest().body("Employee does not belong to this subadmin");
+      }
+      
+      String latitude = locationData.get("latitude");
+      String longitude = locationData.get("longitude");
+      
+      if (latitude == null || longitude == null) {
+        return ResponseEntity.badRequest().body("Latitude and longitude are required");
+      }
+      
+      Employee updatedEmployee = empService.updateLocation(empId, latitude, longitude);
+      return ResponseEntity.ok(updatedEmployee);
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+    }
+  }
+  
+  /**
+   * Post an employee's location (alternative to PUT for some clients)
+   */
+  @PostMapping("/{subadminId}/employee/{empId}/location")
+  public ResponseEntity<?> postEmployeeLocation(
+      @PathVariable int subadminId,
+      @PathVariable int empId,
+      @RequestBody Map<String, String> locationData) {
+      
+    return updateEmployeeLocation(subadminId, empId, locationData);
+  }
 
   /**
    * Single‑record add or update endpoint.

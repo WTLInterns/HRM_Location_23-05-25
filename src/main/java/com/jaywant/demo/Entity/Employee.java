@@ -45,6 +45,11 @@ public class Employee {
   private String adharimg;
   private String panimg;
   private String role = "EMPLOYEE";
+  
+  private String latitude;
+  private String longitude;
+  private String lastLatitude;
+  private String lastLongitude;
 
   @ManyToOne
   @JoinColumn(name = "subadmin_id")
@@ -358,5 +363,37 @@ public class Employee {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+  
+  public String getLatitude() {
+    return latitude;
+  }
+  
+  public void setLatitude(String latitude) {
+    this.latitude = latitude;
+  }
+  
+  public String getLongitude() {
+    return longitude;
+  }
+  
+  public void setLongitude(String longitude) {
+    this.longitude = longitude;
+  }
+  
+  public String getLastLatitude() {
+    return lastLatitude;
+  }
+  
+  public void setLastLatitude(String lastLatitude) {
+    this.lastLatitude = lastLatitude;
+  }
+  
+  public String getLastLongitude() {
+    return lastLongitude;
+  }
+  
+  public void setLastLongitude(String lastLongitude) {
+    this.lastLongitude = lastLongitude;
   }
 }
