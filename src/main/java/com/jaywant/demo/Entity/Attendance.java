@@ -220,8 +220,11 @@ public class Attendance {
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
   @Column(columnDefinition = "TIME(0)")
-  private LocalTime lunchOutTime;
+  private LocalTime lunchOutTime;  
 
+  private String workType;
+
+  
   @ManyToOne
   @JoinColumn(name = "employee_id")
   @JsonBackReference
@@ -294,4 +297,19 @@ public class Attendance {
   public void setLunchOutTime(LocalTime lunchOutTime) { this.lunchOutTime = lunchOutTime != null ? lunchOutTime.truncatedTo(ChronoUnit.MINUTES) : null; }
   public Employee getEmployee() { return employee; }
   public void setEmployee(Employee employee) { this.employee = employee; }
+
+    /**
+     * @return String return the workType
+     */
+    public String getWorkType() {
+        return workType;
+    }
+
+    /**
+     * @param workType the workType to set
+     */
+    public void setWorkType(String workType) {
+        this.workType = workType;
+    }
+
 }

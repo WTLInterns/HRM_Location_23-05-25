@@ -970,6 +970,7 @@ public class SubAdminController {
       @RequestParam String bankIfscCode,
       @RequestParam String branchName,
       @RequestParam Long salary,
+
       @RequestPart(required = false) MultipartFile empimg,
       @RequestPart(required = false) MultipartFile adharimg,
       @RequestPart(required = false) MultipartFile panimg,

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jaywant.demo.DTO.SalaryDTO;
 import com.jaywant.demo.Entity.Attendance;
 import com.jaywant.demo.Entity.Employee;
@@ -615,6 +615,14 @@ public class EmployeeController {
         entity.setPunchOutTime(incoming.getPunchOutTime());
       }
 
+      if (incoming.getPunchOutTime() != null)
+        entity.setPunchOutTime(incoming.getPunchOutTime());
+
+      // ✏️ copy workType
+      if (incoming.getWorkType() != null) {
+        entity.setWorkType(incoming.getWorkType());
+      }
+
       // recalc derived fields
       entity.calculateDurations();
 
@@ -658,14 +666,8 @@ public class EmployeeController {
     // 3) success
     return ResponseEntity.ok("Login details sent to " + emp.getEmail());
   }
- 
 
-
-
-
-
-
- /**
+  /**
    * GET: all attendance records for an employee
    * URL: GET /api/employee/{subadminId}/{fullName}/attendance/all
    */
@@ -705,7 +707,6 @@ public class EmployeeController {
             .status(HttpStatus.NOT_FOUND)
             .body("No attendance record for date: " + date));
   }
-
 
   /**
    * POST /api/employee/login-employee?email=...&password=...
@@ -800,11 +801,11 @@ public class EmployeeController {
         .registerModule(new JavaTimeModule())
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
-  
+
   // ==========================================================
   // Location Tracking Endpoints
   // ==========================================================
-  
+
   /**
    * Get location of a specific employee by subadmin ID and employee ID
    */
@@ -812,25 +813,25 @@ public class EmployeeController {
   public ResponseEntity<?> getEmployeeLocation(
       @PathVariable int subadminId,
       @PathVariable int empId) {
-      
+
     try {
       // Verify the employee belongs to this subadmin
       Employee employee = employeeRepository.findById(empId).orElse(null);
       if (employee == null) {
         return ResponseEntity.badRequest().body("Employee not found with ID: " + empId);
       }
-      
+
       if (employee.getSubadmin() == null || employee.getSubadmin().getId() != subadminId) {
         return ResponseEntity.badRequest().body("Employee does not belong to this subadmin");
       }
-      
+
       Map<String, Object> locationData = empService.getEmployeeLocation(empId);
       return ResponseEntity.ok(locationData);
     } catch (Exception e) {
       return ResponseEntity.badRequest().body("Error: " + e.getMessage());
     }
   }
-  
+
   /**
    * Get locations of all employees for a subadmin
    */
@@ -843,7 +844,7 @@ public class EmployeeController {
       return ResponseEntity.badRequest().body("Error: " + e.getMessage());
     }
   }
-  
+
   /**
    * Update an employee's location
    */
@@ -852,41 +853,38 @@ public class EmployeeController {
       @PathVariable int subadminId,
       @PathVariable int empId,
       @RequestBody Map<String, String> locationData) {
-      
+
     try {
       // Verify the employee belongs to this subadmin
       Employee employee = employeeRepository.findById(empId).orElse(null);
       if (employee == null) {
         return ResponseEntity.badRequest().body("Employee not found with ID: " + empId);
       }
-      
+
       if (employee.getSubadmin() == null || employee.getSubadmin().getId() != subadminId) {
         return ResponseEntity.badRequest().body("Employee does not belong to this subadmin");
       }
-      
+
       String latitude = locationData.get("latitude");
       String longitude = locationData.get("longitude");
-      
+
       if (latitude == null || longitude == null) {
         return ResponseEntity.badRequest().body("Latitude and longitude are required");
       }
-      
+
       Employee updatedEmployee = empService.updateLocation(empId, latitude, longitude);
       return ResponseEntity.ok(updatedEmployee);
     } catch (Exception e) {
       return ResponseEntity.badRequest().body("Error: " + e.getMessage());
     }
   }
-  
-  /**
-   * Post an employee's location (alternative to PUT for some clients)
-   */
+
   @PostMapping("/{subadminId}/employee/{empId}/location")
   public ResponseEntity<?> postEmployeeLocation(
       @PathVariable int subadminId,
       @PathVariable int empId,
       @RequestBody Map<String, String> locationData) {
-      
+
     return updateEmployeeLocation(subadminId, empId, locationData);
   }
 
@@ -946,5 +944,4 @@ public class EmployeeController {
         .status(existing.isPresent() ? HttpStatus.OK : HttpStatus.CREATED)
         .body(saved);
   }
-
 }
