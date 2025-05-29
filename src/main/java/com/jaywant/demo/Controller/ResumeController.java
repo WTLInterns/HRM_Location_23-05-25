@@ -47,5 +47,18 @@ public class ResumeController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error fetching resume: " + e.getMessage());
         }
+    } 
+
+    @DeleteMapping("/{resumeId}")
+    public ResponseEntity<?> deleteResume(@PathVariable int resumeId) {
+        try {
+            resumeService.deleteResume(resumeId);
+            return ResponseEntity.ok().body("Resume deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error deleting resume: " + e.getMessage());
+        }
     }
+
+
+
 }

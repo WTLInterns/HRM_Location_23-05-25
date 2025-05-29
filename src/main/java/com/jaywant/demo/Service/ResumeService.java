@@ -23,7 +23,7 @@ public class ResumeService {
     @Autowired
     private EmployeeRepo employeeRepo;
 
-    private final String UPLOAD_DIR = "uploads/resumes/";
+    private final String UPLOAD_DIR = "src/main/resources/static/uploads/resumes/";
 
     public Resume uploadResume(MultipartFile file, int empId, String jobRole) throws IOException {
         Employee employee = employeeRepo.findById(empId)
@@ -58,5 +58,20 @@ public class ResumeService {
     public Resume getResumeById(int resumeId) {
         return resumeRepo.findById(resumeId)
             .orElseThrow(() -> new RuntimeException("Resume not found"));
+    }  
+
+    public void deleteResume(int resumeId) throws IOException {
+        Resume resume = resumeRepo.findById(resumeId)
+            .orElseThrow(() -> new RuntimeException("Resume not found"));
+
+        // Delete the physical file
+        Path filePath = Paths.get(resume.getResumeFilePath());
+        if (Files.exists(filePath)) {
+            Files.delete(filePath);
+        }
+
+        // Delete the database entry
+        resumeRepo.deleteById(resumeId);
     }
-}
+
+} 
