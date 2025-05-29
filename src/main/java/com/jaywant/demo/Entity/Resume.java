@@ -19,11 +19,7 @@ public class Resume {
     private String jobRole;
     
     @Column(name = "is_verified")
-    private boolean isVerified = false; 
-
-    @ManyToOne
-    @JoinColumn(name = "subadmin_id")
-    private Subadmin subadmin;
+    private boolean isVerified = false;
 
     public Resume() {
     }
@@ -83,13 +79,5 @@ public class Resume {
 
     public void setVerified(boolean verified) {
         this.isVerified = verified;
-    }
-
-    public Subadmin getSubadmin() {
-        return subadmin;
-    }
-
-    public void setSubadmin(Subadmin subadmin) {
-        this.subadmin = subadmin;
     }
 }

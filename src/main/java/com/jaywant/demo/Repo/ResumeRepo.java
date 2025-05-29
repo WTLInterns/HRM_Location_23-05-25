@@ -8,6 +8,4 @@ import java.util.List;
 @Repository
 public interface ResumeRepo extends JpaRepository<Resume, Integer> {
     List<Resume> findByEmployeeEmpId(int empId);
-    List<Resume> findBySubadminId(int subadminId);
-    List<Resume> findBySubadminIdAndIsVerified(int subadminId, boolean isVerified);
 }
