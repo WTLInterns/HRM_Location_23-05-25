@@ -21,7 +21,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Register the "/ws" endpoint, enabling the SockJS protocol
         // SockJS is used to enable fallback options for browsers that don't support WebSocket
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("*")
+        .setAllowedOrigins(
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "https://admin.managifyhr.com"
+        )
                 .withSockJS();
     }
 }
