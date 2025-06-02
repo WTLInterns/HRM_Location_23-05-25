@@ -29,6 +29,9 @@ public class LocationController {
     
     @Autowired
     private EmployeeRepo employeeRepository;
+
+    @Autowired
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
     
     // ==========================================================
     // Location Tracking Endpoints (matches EmployeeController format)
@@ -101,6 +104,19 @@ public class LocationController {
         }
         
         Employee updatedEmployee = employeeService.updateLocation(empId, latitude, longitude);
+
+        // Prepare response for broadcast
+        Map<String, Object> response = Map.of(
+            "empId", updatedEmployee.getEmpId(),
+            "fullName", updatedEmployee.getFullName(),
+            "latitude", updatedEmployee.getLatitude(),
+            "longitude", updatedEmployee.getLongitude(),
+            "lastLatitude", updatedEmployee.getLastLatitude(),
+            "lastLongitude", updatedEmployee.getLastLongitude()
+        );
+        // Broadcast to WebSocket subscribers
+        messagingTemplate.convertAndSend("/topic/location/" + subadminId, response);
+
         return ResponseEntity.ok(updatedEmployee);
       } catch (Exception e) {
         return ResponseEntity.badRequest().body("Error: " + e.getMessage());

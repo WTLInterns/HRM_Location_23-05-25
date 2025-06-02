@@ -37,7 +37,7 @@ public class OpeningController {
     // Update Opening for a subadmin
     @PutMapping("/{id}")
     public Opening updateOpening(@PathVariable("subadminid") int subadminId, @PathVariable("id") int id, @RequestBody Opening opening) {
-        return openingService.updateOpeningFokrSubadmin(subadminId, id, opening);
+        return openingService.updateOpeningForSubadmin(subadminId, id, opening);
     }
 
     // Delete Opening for a subadmin
