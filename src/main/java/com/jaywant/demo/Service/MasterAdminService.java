@@ -104,12 +104,37 @@ public class MasterAdminService {
   // companylogo
 
   public Subadmin createSubAdmin(Subadmin subAdmin, Long masterAdminId,
-      MultipartFile stampImg, MultipartFile signature, MultipartFile companylogo) {
+      MultipartFile stampImg, MultipartFile signature, MultipartFile companylogo, String packageType,
+      Integer customCount) {
 
     MasterAdmin masterAdmin = masterRepo.findById(masterAdminId)
         .orElseThrow(() -> new RuntimeException("Master Admin not found with ID: " + masterAdminId));
 
     subAdmin.setMasterAdmin(masterAdmin);
+
+    // Package logic
+    if ("custom".equalsIgnoreCase(packageType)) {
+      subAdmin.setPackageType("custom");
+      subAdmin.setPackageCount(customCount);
+    } else {
+      subAdmin.setPackageType(packageType);
+      switch (packageType) {
+        case "10":
+          subAdmin.setPackageCount(10);
+          break;
+        case "15":
+          subAdmin.setPackageCount(15);
+          break;
+        case "30":
+          subAdmin.setPackageCount(30);
+          break;
+        case "40":
+          subAdmin.setPackageCount(40);
+          break;
+        default:
+          throw new IllegalArgumentException("Invalid package type");
+      }
+    }
 
     if (stampImg != null && !stampImg.isEmpty()) {
       subAdmin.setStampImg(saveFile(stampImg));
@@ -245,5 +270,4 @@ public class MasterAdminService {
 // throw new RuntimeException("Failed to save file: " + newFilename, e);
 // }
 // return newFilename;
-// }
 // }

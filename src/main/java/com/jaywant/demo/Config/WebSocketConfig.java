@@ -24,8 +24,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         .setAllowedOrigins(
             "http://localhost:5173",
             "http://localhost:5174",
-            "https://admin.managifyhr.com"
+            "https://admin.managifyhr.com",
+            "https://api.managifyhr.com"
         )
-                .withSockJS();
+                .withSockJS(); 
+
+                registry.addEndpoint("/ws")
+                .setAllowedOrigins(
+                    "http://localhost:5173",
+                    "http://localhost:5174",
+                    "https://admin.managifyhr.com",
+                    "https://api.managifyhr.com"
+                );
+        
     }
 }

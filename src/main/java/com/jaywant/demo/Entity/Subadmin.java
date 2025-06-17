@@ -43,6 +43,8 @@ public class Subadmin {
 
     private Double latitude;
     private Double longitude;
+    private String packageType; // 15, 30, 40, custom
+    private Integer packageCount; // number of employees allowed
 
     // getters & setters
     public Double getLatitude() {
@@ -231,10 +233,27 @@ public class Subadmin {
         this.address = address;
     }
 
+    public String getPackageType() {
+        return packageType;
+    }
+
+    public void setPackageType(String packageType) {
+        this.packageType = packageType;
+    }
+
+    public Integer getPackageCount() {
+        return packageCount;
+    }
+
+    public void setPackageCount(Integer packageCount) {
+        this.packageCount = packageCount;
+    }
+
     public Subadmin(int id, String name, String lastname, String stampImg, String signature, String email,
             String phoneno, String password, String registercompanyname, String companylogo, String role, String gstno,
             String status, String cinno, String companyurl, String address, Double latitude, Double longitude,
-            MasterAdmin masterAdmin, List<Employee> employee, List<Certificate> certificates) {
+            MasterAdmin masterAdmin, List<Employee> employee, List<Certificate> certificates, String packageType,
+            Integer packageCount) {
         this.id = id;
         this.name = name;
         this.lastname = lastname;
@@ -256,6 +275,8 @@ public class Subadmin {
         this.masterAdmin = masterAdmin;
         this.employee = employee;
         this.certificates = certificates;
+        this.packageType = packageType;
+        this.packageCount = packageCount;
     }
 
     public Subadmin() {

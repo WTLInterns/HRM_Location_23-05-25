@@ -146,9 +146,9 @@ public class MasterAdminController {
       @RequestParam(value = "address", required = false) String address,
       @RequestParam(value = "companyurl", required = false) String companyurl,
       @RequestParam(value = "latitude", required = false) Double latitude,
-      @RequestParam(value = "longitude", required = false) Double longitude
-
-  ) {
+      @RequestParam(value = "longitude", required = false) Double longitude,
+      @RequestParam("packageType") String packageType,
+      @RequestParam(value = "customCount", required = false) Integer customCount) {
     try {
       Subadmin subadmin = new Subadmin();
       subadmin.setName(name);
@@ -166,7 +166,8 @@ public class MasterAdminController {
       subadmin.setLongitude(longitude);
       // Role will be set by default in the entity ("SUB_ADMIN")
 
-      Subadmin saved = masterAdminService.createSubAdmin(subadmin, id, stampImg, signature, companylogo);
+      Subadmin saved = masterAdminService.createSubAdmin(subadmin, id, stampImg, signature, companylogo, packageType,
+          customCount);
       return ResponseEntity.ok(saved);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("SubAdmin registration failed: " + e.getMessage());

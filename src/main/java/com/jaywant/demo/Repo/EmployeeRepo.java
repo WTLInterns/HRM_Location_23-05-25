@@ -37,4 +37,6 @@ public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
             @Param("firstName") String firstName,
             @Param("lastName") String lastName);
 
+    int countBySubadmin(Subadmin subadmin);
+
 }

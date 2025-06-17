@@ -329,7 +329,8 @@ public class SubAdminService {
       String address,
       MultipartFile stampImg,
       MultipartFile signature,
-      MultipartFile companylogo, Double latitude, Double longitude) {
+      MultipartFile companylogo, Double latitude, Double longitude,
+      String packageType, Integer customCount) {
 
     Subadmin subAdmin = repo.findById(id)
         .orElseThrow(() -> new RuntimeException("Subadmin not found with ID: " + id));
@@ -345,6 +346,27 @@ public class SubAdminService {
     subAdmin.setAddress(address);
     subAdmin.setLatitude(latitude);
     subAdmin.setLongitude(longitude);
+
+    // Package logic
+    if ("custom".equalsIgnoreCase(packageType)) {
+      subAdmin.setPackageType("custom");
+      subAdmin.setPackageCount(customCount);
+    } else {
+      subAdmin.setPackageType(packageType);
+      switch (packageType) {
+        case "15":
+          subAdmin.setPackageCount(15);
+          break;
+        case "30":
+          subAdmin.setPackageCount(30);
+          break;
+        case "40":
+          subAdmin.setPackageCount(40);
+          break;
+        default:
+          throw new IllegalArgumentException("Invalid package type");
+      }
+    }
 
     // Update optional files when provided
     if (stampImg != null && !stampImg.isEmpty()) {

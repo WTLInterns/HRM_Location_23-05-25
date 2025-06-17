@@ -282,9 +282,8 @@ public class EmployeeController {
   @GetMapping("/{subadminId}/employee/all")
   public ResponseEntity<?> getAllEmployeesForSubadmin(@PathVariable int subadminId) {
     List<Employee> employees = employeeRepository.findBySubadminId(subadminId);
-    if (employees == null || employees.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body("No employees found for SubAdmin ID: " + subadminId);
+    if (employees == null) {
+      return ResponseEntity.ok(new java.util.ArrayList<>());
     }
     return ResponseEntity.ok(employees);
   }
