@@ -179,7 +179,7 @@ public class SubAdminController {
       @RequestParam(value = "stampImg", required = false) MultipartFile stampImg,
       @RequestParam(value = "signature", required = false) MultipartFile signature,
       @RequestParam(value = "companylogo", required = false) MultipartFile companylogo,
-      @RequestParam("packageType") String packageType,
+      @RequestParam(value = "packageType", required = false) String packageType,
       @RequestParam(value = "customCount", required = false) Integer customCount) {
     Optional<Subadmin> existing = subAdminRepo.findById(id);
     if (!existing.isPresent()) {
@@ -539,3 +539,4 @@ public class SubAdminController {
     return ResponseEntity.ok(packageInfo);
   }
 }
+      

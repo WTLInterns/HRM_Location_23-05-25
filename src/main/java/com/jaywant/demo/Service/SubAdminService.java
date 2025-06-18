@@ -143,8 +143,12 @@
 package com.jaywant.demo.Service;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -347,26 +351,35 @@ public class SubAdminService {
     subAdmin.setLatitude(latitude);
     subAdmin.setLongitude(longitude);
 
-    // Package logic
-    if ("custom".equalsIgnoreCase(packageType)) {
-      subAdmin.setPackageType("custom");
-      subAdmin.setPackageCount(customCount);
-    } else {
-      subAdmin.setPackageType(packageType);
-      switch (packageType) {
-        case "15":
-          subAdmin.setPackageCount(15);
-          break;
-        case "30":
-          subAdmin.setPackageCount(30);
-          break;
-        case "40":
-          subAdmin.setPackageCount(40);
-          break;
-        default:
-          throw new IllegalArgumentException("Invalid package type");
+    // Package logic (null-safe)
+    if (packageType != null && !packageType.trim().isEmpty()) {
+      if ("custom".equalsIgnoreCase(packageType)) {
+        subAdmin.setPackageType("custom");
+        if (customCount != null) {
+          subAdmin.setPackageCount(customCount);
+        }
+        // If customCount is null, do not update packageCount (leave as is)
+      } else {
+        subAdmin.setPackageType(packageType);
+        switch (packageType) {
+          case "10":
+            subAdmin.setPackageCount(10);
+            break;
+          case "15":
+            subAdmin.setPackageCount(15);
+            break;
+          case "30":
+            subAdmin.setPackageCount(30);
+            break;
+          case "40":
+            subAdmin.setPackageCount(40);
+            break;
+          default:
+            throw new IllegalArgumentException("Invalid package type");
+        }
       }
     }
+    // If packageType is null or empty, do not update packageType or packageCount
 
     // Update optional files when provided
     if (stampImg != null && !stampImg.isEmpty()) {
