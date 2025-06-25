@@ -64,49 +64,50 @@ public class SubAdminController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
       }
       Subadmin subAdmin = subAdmins.get(0);
-      if (password.equals(subAdmin.getPassword())) {
-        // Build response with all subadmin info and its masteradmin info
-        Map<String, Object> response = new HashMap<>();
-        // Subadmin info
-        response.put("id", subAdmin.getId());
-        response.put("name", subAdmin.getName());
-        response.put("lastname", subAdmin.getLastname());
-        response.put("stampImg", subAdmin.getStampImg());
-        response.put("signature", subAdmin.getSignature());
-        response.put("email", subAdmin.getEmail());
-        response.put("phoneno", subAdmin.getPhoneno());
-        response.put("password", subAdmin.getPassword());
-        response.put("registercompanyname", subAdmin.getRegistercompanyname());
-        response.put("companylogo", subAdmin.getCompanylogo());
-        response.put("role", subAdmin.getRole());
-        response.put("gstno", subAdmin.getGstno());
-        response.put("status", subAdmin.getStatus());
-        response.put("cinno", subAdmin.getCinno());
-        response.put("companyurl", subAdmin.getCompanyurl());
-        response.put("address", subAdmin.getAddress());
-        response.put("latitude", subAdmin.getLatitude());
-        response.put("longitude", subAdmin.getLongitude());
-        response.put("packageType", subAdmin.getPackageType());
-        response.put("packageCount", subAdmin.getPackageCount());
-        // MasterAdmin info
-        MasterAdmin master = subAdmin.getMasterAdmin();
-        if (master != null) {
-          Map<String, Object> masterInfo = new HashMap<>();
-          masterInfo.put("id", master.getId());
-          masterInfo.put("name", master.getName());
-          masterInfo.put("email", master.getEmail());
-          masterInfo.put("mobileno", master.getMobileno());
-          masterInfo.put("roll", master.getRoll());
-          masterInfo.put("profileImg", master.getProfileImg());
-          // Do not include password for security, or include if needed
-          response.put("masterAdmin", masterInfo);
-        } else {
-          response.put("masterAdmin", null);
-        }
-        return ResponseEntity.ok(response);
-      } else {
+      // Check password
+      if (!password.equals(subAdmin.getPassword())) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
       }
+      // Check active status
+      if (!"Active".equalsIgnoreCase(subAdmin.getStatus())) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Your account is inactive. Please contact support.");
+      }
+      // Build response with all subadmin info and its masteradmin info
+      Map<String, Object> response = new HashMap<>();
+      response.put("id", subAdmin.getId());
+      response.put("name", subAdmin.getName());
+      response.put("lastname", subAdmin.getLastname());
+      response.put("stampImg", subAdmin.getStampImg());
+      response.put("signature", subAdmin.getSignature());
+      response.put("email", subAdmin.getEmail());
+      response.put("phoneno", subAdmin.getPhoneno());
+      response.put("password", subAdmin.getPassword());
+      response.put("registercompanyname", subAdmin.getRegistercompanyname());
+      response.put("companylogo", subAdmin.getCompanylogo());
+      response.put("role", subAdmin.getRole());
+      response.put("gstno", subAdmin.getGstno());
+      response.put("status", subAdmin.getStatus());
+      response.put("cinno", subAdmin.getCinno());
+      response.put("companyurl", subAdmin.getCompanyurl());
+      response.put("address", subAdmin.getAddress());
+      response.put("latitude", subAdmin.getLatitude());
+      response.put("longitude", subAdmin.getLongitude());
+      response.put("packageType", subAdmin.getPackageType());
+      response.put("packageCount", subAdmin.getPackageCount());
+      MasterAdmin master = subAdmin.getMasterAdmin();
+      if (master != null) {
+        Map<String, Object> masterInfo = new HashMap<>();
+        masterInfo.put("id", master.getId());
+        masterInfo.put("name", master.getName());
+        masterInfo.put("email", master.getEmail());
+        masterInfo.put("mobileno", master.getMobileno());
+        masterInfo.put("roll", master.getRoll());
+        masterInfo.put("profileImg", master.getProfileImg());
+        response.put("masterAdmin", masterInfo);
+      } else {
+        response.put("masterAdmin", null);
+      }
+      return ResponseEntity.ok(response);
     } catch (Exception ex) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("An error occurred during login.");
